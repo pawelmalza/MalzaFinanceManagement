@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static "css/bootstrap.css" %}">
+    <script src="{% static "js/jquery-3.4.1.min.js" %}"></script>
+    <script src="{% static "js/malza.js" %}"></script>
+</head>
+<body>
+{% block header %}
+{% endblock %}
+<br>
+{% block content %}
+{% endblock %}
+<footer>{% block footer %}{% endblock %}</footer>
+</body>
+</html>

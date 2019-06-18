@@ -13,23 +13,26 @@ class Goods(models.Model):
     name = models.CharField(max_length=255)
     on_stock = models.DecimalField(decimal_places=2, default=0, max_digits=9)
     units = models.CharField(max_length=255)
-    purchase_average_price = models.DecimalField(decimal_places=2, max_digits=9, default=0)
-    purchase_count = models.IntegerField()
-    sale_average_price = models.DecimalField(decimal_places=2, max_digits=9, default=0)
-    sale_count = models.IntegerField()
+    # PROCENT PROFIT
 
 
 class Purchases(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     goods = models.ManyToManyField(Goods)
     price_per_unit = models.DecimalField(decimal_places=2, max_digits=9)
     quantity_bought = models.DecimalField(decimal_places=2, default=1, max_digits=9)
     date = models.DateField()
-    additional_costs = models.IntegerField()
+    # DODAC DODATKOWE KOSZTY W FORMULARZU
 
 
 class Sales(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     goods = models.ManyToManyField(Goods)
     price_per_unit = models.DecimalField(decimal_places=2, max_digits=9)
     quantity_sold = models.DecimalField(decimal_places=2, default=1, max_digits=9)
     date = models.DateField()
-    additional_income = models.IntegerField()
+    # DODAC DODATKOWE KOSZTY W FORMULARZU
+
+
+class AddtionalCosts(models.Model):
+    pass

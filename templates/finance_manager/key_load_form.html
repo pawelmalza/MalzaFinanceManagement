@@ -1,0 +1,12 @@
+{% extends "finance_manager/base.html" %}
+
+{% block content %}
+    {{ message|safe }}
+    <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="{{ submit }}">
+    </form>
+    <p>{{ response|safe }}</p>
+
+{% endblock %}
