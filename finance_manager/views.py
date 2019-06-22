@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView
+from .functions import *
 
 from .forms import *
 from django.views import View
@@ -43,12 +44,8 @@ class LoadEncryptionKeView(View):
         form = LoadEncryptionKeyForm(request.POST, request.FILES)
         if form.is_valid():
             encryption_key = request.FILES['encryption_key'].read()
-            print(encryption_key)
-            print(len(encryption_key))
             request.session['key'] = encryption_key
-            crash_test = request.session['key']
-            print(crash_test)
-            print(len(crash_test))
+
             return redirect(reverse_lazy('main_screen'))
         else:
             return HttpResponse("dupa")
@@ -72,13 +69,25 @@ class AddGoodsView(LoginRequiredMixin, View):
 
     def post(self, request):
         formset = AddGoodsFormset(request.POST)
+        key = request.session['key']
         if formset.is_valid():
             for form in formset:
-                name = form.cleaned_data.get('name')
-                on_stock = form.cleaned_data.get('on_stock')
-                units = form.cleaned_data.get('units')
-                user_id = request.user.id
-                Goods.objects.create(user_id=user_id, name=name, on_stock=on_stock, units=units)
+                name = encrypt(key, form.cleaned_data.get('name'))
+                on_stock = encrypt(key, form.cleaned_data.get('on_stock'))
+                units = encrypt(key, form.cleaned_data.get('units'))
+                Goods.objects.create(user_id=request.user.id, name=name, on_stock=on_stock, units=units)
             return redirect(reverse_lazy('main_screen'))
         else:
             return HttpResponse(len(formset))
+
+
+class DisplayGoodsView(LoginRequiredMixin, View):
+
+    def get(self, request):
+        goods = Goods.objects.filter(user_id=request.user.id)
+        key = request.session['key']
+        for item in goods:
+            item.name = decrypt(key, item.name.tobytes())
+            item.on_stock = decrypt(key, item.on_stock.tobytes())
+            item.units = decrypt(key, item.units.tobytes())
+        return render(request, "finance_manager/goods_list_template.html", {"goods": goods})

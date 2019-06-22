@@ -10,9 +10,9 @@ class UserDefinedUnits(models.Model):
 
 class Goods(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    on_stock = models.DecimalField(decimal_places=2, default=0, max_digits=9)
-    units = models.CharField(max_length=255)
+    name = models.BinaryField()
+    on_stock = models.BinaryField()
+    units = models.BinaryField()
     # PROCENT PROFIT
 
 

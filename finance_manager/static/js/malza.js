@@ -10,7 +10,5 @@ $(function () {
         fieldSetToClone = fieldSetToClone.replace(/-(\d)-/gm,`-${ActualCounter}-`);
         dynamic_form_counter.attr('value', parseInt(ActualCounter)+1);
         dynamic_form_separator.before(fieldSetToClone);
-
-
     })
 });

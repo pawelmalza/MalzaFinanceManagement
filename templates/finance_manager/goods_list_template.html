@@ -1,0 +1,19 @@
+{% extends "finance_manager/base.html" %}
+
+
+{% block content %}
+<table>
+<tr>
+    <th>Name</th>
+    <th>on stock</th>
+    <th>units</th>
+</tr>
+{% for item in goods %}
+<tr>
+<td>{{ item.name }}</td>
+<td>{{ item.on_stock }}</td>
+<td>{{ item.units }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

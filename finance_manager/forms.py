@@ -14,10 +14,11 @@ class LoadEncryptionKeyForm(forms.Form):
     encryption_key = forms.FileField(validators=[file_size_validator])
 
 
-class AddGoodsForm(forms.ModelForm):
-    class Meta:
-        model = Goods
-        exclude = ['user']
+class AddGoodsForm(forms.Form):
+
+    name = forms.CharField()
+    on_stock = forms.DecimalField()
+    units = forms.CharField()
 
 
-AddGoodsFormset = formset_factory(AddGoodsForm, extra=2)
+AddGoodsFormset = formset_factory(AddGoodsForm, extra=1)
