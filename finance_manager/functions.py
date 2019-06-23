@@ -4,6 +4,7 @@ from Crypto import Random
 import base64
 import os
 from .models import *
+from tempfile import NamedTemporaryFile
 
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
@@ -45,3 +46,8 @@ def decrypt(key, output):
     output = str(output)
     output = output[2:-1]
     return output
+
+
+def key_generator():
+    key = Random.new().read(32)
+    return key
