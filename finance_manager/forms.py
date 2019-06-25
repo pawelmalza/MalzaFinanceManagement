@@ -1,8 +1,22 @@
 from django import forms
-from django.forms import formset_factory
+from django.forms import formset_factory, Select
 
-from .models import *
-from finance_manager.validators import file_size_validator
+from finance_manager.functions import get_user_contractors, get_user_goods
+from finance_manager.validators import *
+
+
+class RegisterForm(forms.Form):
+    email = forms.EmailField(validators=[validate_mail_exists])
+    password = forms.CharField(max_length=255, widget=forms.PasswordInput)
+    confirm_password = forms.CharField(max_length=255, widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_data = super(RegisterForm, self).clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        if password != confirm_password:
+            raise forms.ValidationError("Passwords not match")
 
 
 class LoginFrom(forms.Form):
@@ -15,10 +29,36 @@ class LoadEncryptionKeyForm(forms.Form):
 
 
 class AddGoodsForm(forms.Form):
-
     name = forms.CharField()
     on_stock = forms.DecimalField()
     units = forms.CharField()
 
 
+class AddContractorForm(forms.Form):
+    name = forms.CharField()
+
+
+class SelectContractorAndDateForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.contractors = kwargs.pop('contractors')
+        super(SelectContractorAndDateForm, self).__init__()
+        self.fields['contractor'] = forms.ChoiceField(choices=self.contractors)
+
+    contractor = forms.ChoiceField()
+    date = forms.DateField()
+
+
+class AddPurchaseAndSaleForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.goods = kwargs.pop('goods')
+        super(AddPurchaseAndSaleForm, self).__init__()
+        self.fields['goods'] = forms.ChoiceField(choices=self.goods)
+
+    goods = forms.ChoiceField()
+    price_per_unit = forms.DecimalField()
+    quantity = forms.IntegerField()
+
+
 AddGoodsFormset = formset_factory(AddGoodsForm, extra=1)
+AddContractorFormset = formset_factory(AddContractorForm, extra=1)
+AddPurchaseAndSaleFormset = formset_factory(AddPurchaseAndSaleForm, extra=1)

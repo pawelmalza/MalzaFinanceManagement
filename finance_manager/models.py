@@ -2,10 +2,15 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class Contractors(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.BinaryField()
+
+
 class UserDefinedUnits(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    short_name = models.CharField(max_length=10)
-    full_name = models.CharField(max_length=255)
+    short_name = models.BinaryField()
+    full_name = models.BinaryField()
 
 
 class Goods(models.Model):
@@ -18,20 +23,32 @@ class Goods(models.Model):
 
 class Purchases(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    goods = models.ManyToManyField(Goods)
-    price_per_unit = models.DecimalField(decimal_places=2, max_digits=9)
-    quantity_bought = models.DecimalField(decimal_places=2, default=1, max_digits=9)
+    contractor = models.ForeignKey(Contractors, on_delete=models.CASCADE)
+    goods = models.ManyToManyField(Goods, through='PurchasesGoods')
     date = models.DateField()
     # DODAC DODATKOWE KOSZTY W FORMULARZU
+
+
+class PurchasesGoods(models.Model):
+    goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
+    purchase = models.ForeignKey(Purchases, on_delete=models.CASCADE)
+    price_per_unit = models.BinaryField()
+    quantity_bought = models.BinaryField()
 
 
 class Sales(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    goods = models.ManyToManyField(Goods)
-    price_per_unit = models.DecimalField(decimal_places=2, max_digits=9)
-    quantity_sold = models.DecimalField(decimal_places=2, default=1, max_digits=9)
+    contractor = models.ForeignKey(Contractors, on_delete=models.CASCADE)
+    goods = models.ManyToManyField(Goods, through='SalesGoods')
     date = models.DateField()
     # DODAC DODATKOWE KOSZTY W FORMULARZU
+
+
+class SalesGoods(models.Model):
+    goods = models.ForeignKey(Goods, on_delete=models.CASCADE)
+    sale = models.ForeignKey(Sales, on_delete=models.CASCADE)
+    price_per_unit = models.BinaryField()
+    quantity_sold = models.BinaryField()
 
 
 class AddtionalCosts(models.Model):

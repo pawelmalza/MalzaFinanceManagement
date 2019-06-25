@@ -1,0 +1,28 @@
+{% extends "finance_manager/base.html" %}
+
+{% block content %}
+    {% for obj in obj_list %}
+        <div>
+            <p>Contractor: {{ obj.contractor.name }}</p>
+            <p>Transaction date: {{ obj.date }}</p>
+            <div class="collapse-toggle">
+                <table class="table-bordered">
+                    <tr>
+                        <th>Goods names</th>
+                        <th>Prices per unit</th>
+                        <th>Quantity sold</th>
+                    </tr>
+                    {% for item in obj.items %}
+                        <tr>
+                            {% for value in item %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        <br>
+    {% endfor %}
+
+{% endblock %}
