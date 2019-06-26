@@ -6,7 +6,7 @@
     <div class="card">
     <div class="card-body">
     <p class="card-title">{{ view }} form:</p>
-    <form method="post" class="dynamicForm form-group card-body">
+    <form method="post" class="dynamicForm form-group pt-3 card-body">
         {% csrf_token %}
         {{ form }}
         {{ formset.management_form }}
@@ -19,7 +19,7 @@
         <a class="btn btn-primary mt-2 mt-xl-0" id="NewRow">Add field</a>
         <br>
         <br>
-        <input class="btn btn-success mt-2 mt-xl-0" type="submit" value="{{ submit }}">
+        <input class="btn btn-light mt-2 mt-xl-0" type="submit" value="{{ submit }}">
 
         <script>
             $(function () {

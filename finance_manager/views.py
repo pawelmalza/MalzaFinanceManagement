@@ -18,7 +18,7 @@ class RegisterFormView(View):
             "submit": "register",
             "view": "register"
         }
-        return render(request, "finance_manager/generic_form.html", ctx)
+        return render(request, "finance_manager/register.html", ctx)
 
     def post(self, request):
         form = RegisterForm(request.POST)
@@ -37,7 +37,7 @@ class RegisterFormView(View):
                 "submit": "register",
                 "view": "register"
             }
-            return render(request, "finance_manager/generic_form.html", ctx)
+            return render(request, "finance_manager/register.html", ctx)
 
 
 class LoginView(View):
@@ -182,7 +182,7 @@ class AddContractorsView(LoginRequiredMixin, View):
         formset = formset(request.GET or None)
         ctx = {
             "formset": formset,
-            "submit": "Add",
+            "submit": "Register Contractor",
             "view": "contractors"
         }
         return render(request, "finance_manager/dynamic_form.html", ctx)
@@ -197,7 +197,7 @@ class AddContractorsView(LoginRequiredMixin, View):
             return redirect(reverse_lazy("view_contractors"))
         ctx = {
             "formset": formset,
-            "submit": "Add",
+            "submit": "Register Contractor",
             "view": "contractors"
         }
         return render(request, "finance_manager/dynamic_form.html", ctx)
@@ -226,7 +226,7 @@ class AddPurchaseView(LoginRequiredMixin, View):
         ctx = {
             "form": form,
             "formset": formset,
-            "submit": "add",
+            "submit": "Register Purchase",
             "view": "Purchases"
         }
         return render(request, "finance_manager/purchase_and_sale_form.html", ctx)
@@ -272,7 +272,7 @@ class AddSaleView(LoginRequiredMixin, View):
         ctx = {
             "form": form,
             "formset": formset,
-            "submit": "add",
+            "submit": "Register Sale",
             "view": "Sales"
         }
         return render(request, "finance_manager/purchase_and_sale_form.html", ctx)
@@ -341,7 +341,7 @@ class AddExtraIncomeView(View):
         form = AddExtraForm()
         ctx = {
             "form": form,
-            "submit": "Add to income",
+            "submit": "Register Additional Income",
             "view": "Extra Income"
         }
         return render(request, "finance_manager/generic_form.html", ctx)
@@ -359,7 +359,7 @@ class AddExtraIncomeView(View):
             return redirect(reverse_lazy('view_income'))
         ctx = {
             "form": form,
-            "submit": "Add to income",
+            "submit": "Register Additional Income",
             "view": "Extra Income"
         }
         return render(request, "finance_manager/generic_form.html", ctx)
@@ -379,7 +379,7 @@ class AddExtraExpensesView(View):
         form = AddExtraForm()
         ctx = {
             "form": form,
-            "submit": "Add to income",
+            "submit": "Register Additional Expense",
             "view": "Extra Expenses"
         }
         return render(request, "finance_manager/generic_form.html", ctx)
@@ -397,7 +397,7 @@ class AddExtraExpensesView(View):
             return redirect(reverse_lazy('view_expenses'))
         ctx = {
             "form": form,
-            "submit": "Add to income",
+            "submit": "Register Additional Expense",
             "view": "Extra Expenses"
         }
         return render(request, "finance_manager/generic_form.html", ctx)

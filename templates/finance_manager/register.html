@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <!-- Required meta tags -->
     {% load static %}
@@ -28,8 +29,8 @@
                         <div class="brand-logo">
                             <img src="{% static "images/logo.svg" %}" alt="logo">
                         </div>
-                        <h4>Hello! let's get started</h4>
-                        <h6 class="font-weight-light">Sign in to continue.</h6>
+                        <h4>New here?</h4>
+                        <h6 class="font-weight-light">Signing up is easy. It only takes a few steps</h6>
                         {{ message|safe }}
                         <form class="pt-3" method="post">
                             <div class="form-group">
@@ -39,10 +40,10 @@
                             <div class="mt-3">
                                 <input type="submit"
                                        class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn"
-                                       value="Login">
+                                       value="Register">
                             </div>
                             <div class="text-center mt-4 font-weight-light">
-                                Don't have an account? <a href="/register/" class="text-primary">Create</a>
+                                Already have an account? <a href="/" class="text-primary">Login</a>
                             </div>
                         </form>
                     </div>

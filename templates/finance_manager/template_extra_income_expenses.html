@@ -5,7 +5,8 @@
 {% block content %}
 <div class="card">
 <div class="card-body">
-<p class="card-title">{{ view }} form:</p>
+<p class="card-title"style="display: inline-block">{{ view }} list:</p>
+<a class="btn btn-light mt-5 mt-xl-0 expand" style="display: inline-block; float: right;" href="add/">Add new</a>
     {% for income in data %}
         <div class="card-header">
         <h3>{{ income.name }}</h3>
@@ -13,7 +14,7 @@
         <a class="btn btn-primary mt-5 mt-xl-0 expand" style="display: inline-block">Details</a>
         </div>
         <div class="card-body collapse">
-        <h4>Amount: {{ income.amount }}</h4>
+        <h4>Amount: {{ income.amount }} PLN</h4>
         <h5>Description:{{ income.description }}</h5>
         </div>
     {% endfor %}

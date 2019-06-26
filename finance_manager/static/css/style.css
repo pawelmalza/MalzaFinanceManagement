@@ -18190,7 +18190,6 @@ body {
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
-  outline: 0;
 }
 
 a,
@@ -18225,11 +18224,6 @@ input:focus,
 select:focus,
 textarea:focus,
 button:focus {
-  outline: none;
-  outline-width: 0;
-  outline-color: transparent;
-  box-shadow: none;
-  outline-style: none;
 }
 
 textarea {
@@ -18304,8 +18298,6 @@ button:visited {
 
 a:focus,
 input:focus {
-  border-color: transparent;
-  outline: none;
 }
 
 @font-face {

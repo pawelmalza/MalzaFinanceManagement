@@ -5,25 +5,27 @@
 {% block content %}
     <div class="card">
         <div class="card-body">
-        <p class="card-title">Goods list:</p>
-        <div class="table card-body">
-            <table class="table" style="width: 50%;">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>on stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in goods %}
+            <p class="card-title" style="display: inline-block">{{ view }} list:</p>
+            <a class="btn btn-light mt-5 mt-xl-0 expand" style="display: inline-block; float: right;" href="add/">Add
+                new</a>
+            <div class="table card-body">
+                <table class="table" style="width: 50%;">
+                    <thead>
                     <tr>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.on_stock }}&nbsp;{{ item.units }}</td>
+                        <th>Name</th>
+                        <th>on stock</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                    {% for item in goods %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.on_stock }}&nbsp;{{ item.units }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 {% endblock %}
