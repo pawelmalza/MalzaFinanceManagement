@@ -1,27 +1,14 @@
+from ast import literal_eval
 from decimal import *
 from datetime import timedelta, date
-
-from django.contrib.auth.models import User
 from Crypto.Cipher import AES
 from Crypto import Random
 import base64
-
-from django.forms import formset_factory
-
 from .models import *
 
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
 unpad = lambda s: s[0:-ord(s[-1:])]
-
-
-def get_user_defined_units(user, key):
-    units = UserDefinedUnits.objects.filter(user=user.id)
-    for unit in units:
-        unit.short_name, unit.full_name = decrypt(key, unit.short_name.tobytes()), \
-                                          decrypt(key, unit.full_name.tobytes())
-    units_list = [(unit.short_name, unit.full_name) for unit in units]
-    return units_list
 
 
 def get_user_contractors(user, key):
@@ -54,6 +41,8 @@ def calculate_purchase_average_price(user, name, purchase_price_per_unit):
 
 
 def encrypt(key, input):
+    input = str(input).strip()
+    input = input.encode('utf-8')
     input = pad(str(input))
     iv = Random.new().read(AES.block_size)
     aes = AES.new(key, AES.MODE_CBC, iv)
@@ -66,8 +55,8 @@ def decrypt(key, output):
     aes = AES.new(key, AES.MODE_CBC, iv)
     output = unpad(aes.decrypt(output))
     output = output[16:]
-    output = str(output)
-    output = output[2:-1]
+    output = str(output.decode('utf8'))
+    output = literal_eval(output).decode()
     return output
 
 
@@ -96,8 +85,7 @@ def get_user_purchases(user, key):
 def on_stock_add(key, item, quantity):
     item = Goods.objects.get(id=item)
     item.on_stock = decrypt(key, item.on_stock)
-    print(item.on_stock)
-    item.on_stock = int(item.on_stock) + int(quantity)
+    item.on_stock = Decimal(item.on_stock) + Decimal(quantity)
     item.on_stock = encrypt(key, item.on_stock)
     item.save()
 
@@ -105,7 +93,7 @@ def on_stock_add(key, item, quantity):
 def on_stock_remove(key, item, quantity):
     item = Goods.objects.get(id=item)
     item.on_stock = decrypt(key, item.on_stock)
-    item.on_stock = int(item.on_stock) - int(quantity)
+    item.on_stock = Decimal(item.on_stock) - Decimal(quantity)
     item.on_stock = encrypt(key, item.on_stock)
     item.save()
 
@@ -154,7 +142,7 @@ def get_user_extra_income(user, key):
 
 
 def get_last_30_days_income(user, key):
-    getcontext().prec = 16
+    # getcontext().prec = 16
     sales = Sales.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
     incomes = ExtraIncome.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
     last_30_days_income = 0
@@ -165,7 +153,34 @@ def get_last_30_days_income(user, key):
             paid = price.price_per_unit * price.quantity_sold
             last_30_days_income += paid
     for income in incomes:
-        last_30_days_income = last_30_days_income + 240000
+        last_30_days_income = last_30_days_income
         income.amount = Decimal(decrypt(key, income.amount))
         last_30_days_income = last_30_days_income + income.amount
+    return last_30_days_income
+
+
+def get_user_extra_expenses(user, key):
+    expenses = ExtraExpenses.objects.filter(user_id=user.id)
+    for money in expenses:
+        money.name = decrypt(key, money.name)
+        money.amount = decrypt(key, money.amount)
+        money.description = decrypt(key, money.description)
+    return expenses
+
+
+def get_last_30_days_expenses(user, key):
+    # getcontext().prec = 16
+    purchases = Purchases.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
+    expenses = ExtraExpenses.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
+    last_30_days_income = 0
+    for purchase in purchases:
+        for price in purchase.purchasesgoods_set.all():
+            price.price_per_unit = Decimal(decrypt(key, price.price_per_unit))
+            price.quantity_bought = Decimal(decrypt(key, price.quantity_bought))
+            paid = price.price_per_unit * price.quantity_bought
+            last_30_days_income += paid
+    for expense in expenses:
+        last_30_days_income = last_30_days_income
+        expense.amount = Decimal(decrypt(key, expense.amount))
+        last_30_days_income = last_30_days_income + expense.amount
     return last_30_days_income

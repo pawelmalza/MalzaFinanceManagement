@@ -35,7 +35,7 @@ class RegisterFormView(View):
                 "form": form,
                 "message": message,
                 "submit": "register",
-                "view": register
+                "view": "register"
             }
             return render(request, "finance_manager/generic_form.html", ctx)
 
@@ -73,7 +73,7 @@ class LoadEncryptionKeyView(LoginRequiredMixin, View):
         ctx = {
             "form": form,
             "submit": "Load Key",
-            "view": "Load Kye"
+            "view": "Load Key"
         }
         return render(request, "finance_manager/key_load_form.html", ctx)
 
@@ -99,8 +99,16 @@ class MainScreenView(LoginRequiredMixin, View):
         try:
             goods = get_user_goods_table(request.user, request.session['key'])
             last_30_days_income = get_last_30_days_income(request.user, request.session['key'])
-            return render(request, "finance_manager/base.html",
-                          {'goods': goods, "view": "Dashboard", "last_30_days_income": last_30_days_income})
+            last_30_days_expenses = get_last_30_days_expenses(request.user, request.session['key'])
+            last_30_days_balance = last_30_days_income - last_30_days_expenses
+            ctx = {
+                'goods': goods,
+                "view": "Dashboard",
+                "last_30_days_income": last_30_days_income,
+                "last_30_days_expenses": last_30_days_expenses,
+                "last_30_days_balance": last_30_days_balance
+            }
+            return render(request, "finance_manager/base.html", ctx)
         except KeyError:
             return redirect(reverse_lazy('load_key'))
 
@@ -111,7 +119,7 @@ class AddGoodsView(LoginRequiredMixin, View):
         formset = AddGoodsFormset(request.GET or None)
         ctx = {
             "formset": formset,
-            "submit": "Add",
+            "submit": "Register Goods",
             "view": "Goods"
         }
         return render(request, "finance_manager/dynamic_form.html", ctx)
@@ -128,7 +136,7 @@ class AddGoodsView(LoginRequiredMixin, View):
             return redirect(reverse_lazy('view_goods'))
         ctx = {
             "formset": formset,
-            "submit": "Add",
+            "submit": "Register Goods",
             "view": "Goods"
         }
         return render(request, "finance_manager/dynamic_form.html", ctx)
@@ -219,7 +227,7 @@ class AddPurchaseView(LoginRequiredMixin, View):
             "form": form,
             "formset": formset,
             "submit": "add",
-            "View": "Purchases"
+            "view": "Purchases"
         }
         return render(request, "finance_manager/purchase_and_sale_form.html", ctx)
 
@@ -324,13 +332,13 @@ class ViewExtraIncomeView(View):
     def get(self, request):
         data = get_user_extra_income(request.user, request.session['key'])
         ctx = {"data": data, "view": "Extra Income"}
-        return render(request, "finance_manager/templa_extra_income_expenses.html", ctx)
+        return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
 
 
 class AddExtraIncomeView(View):
 
     def get(self, request):
-        form = AddExtraIncome()
+        form = AddExtraForm()
         ctx = {
             "form": form,
             "submit": "Add to income",
@@ -339,7 +347,7 @@ class AddExtraIncomeView(View):
         return render(request, "finance_manager/generic_form.html", ctx)
 
     def post(self, request):
-        form = AddExtraIncome(request.POST)
+        form = AddExtraForm(request.POST)
         key = request.session['key']
         if form.is_valid():
             name = encrypt(key, form.cleaned_data.get('name'))
@@ -360,13 +368,36 @@ class AddExtraIncomeView(View):
 class ViewExtraExpensesView(View):
 
     def get(self, request):
-        pass
+        data = get_user_extra_expenses(request.user, request.session['key'])
+        ctx = {"data": data, "view": "Extra Expenses"}
+        return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
 
 
 class AddExtraExpensesView(View):
 
     def get(self, request):
-        pass
+        form = AddExtraForm()
+        ctx = {
+            "form": form,
+            "submit": "Add to income",
+            "view": "Extra Expenses"
+        }
+        return render(request, "finance_manager/generic_form.html", ctx)
 
     def post(self, request):
-        pass
+        form = AddExtraForm(request.POST)
+        key = request.session['key']
+        if form.is_valid():
+            name = encrypt(key, form.cleaned_data.get('name'))
+            date = form.cleaned_data.get('date')
+            amount = encrypt(key, form.cleaned_data.get('amount'))
+            description = encrypt(key, form.cleaned_data.get('description'))
+            ExtraExpenses.objects.create(user_id=request.user.id, name=name, date=date, amount=amount,
+                                         description=description)
+            return redirect(reverse_lazy('view_expenses'))
+        ctx = {
+            "form": form,
+            "submit": "Add to income",
+            "view": "Extra Expenses"
+        }
+        return render(request, "finance_manager/generic_form.html", ctx)

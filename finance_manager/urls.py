@@ -19,6 +19,8 @@ urlpatterns = [
     path('sales/', ViewSalesView.as_view(), name='view_sales'),
     path('notes/', ViewNotesView.as_view(), name='view_notes'),
     path('notes/add/', AddNotesView.as_view(), name='add_notes'),
-    path('extra_income/', ViewExtraIncomeView.as_view(), name='view_income'),
-    path('extra_income/add/', AddExtraIncomeView.as_view(), name='add_income'),
+    path('income/', ViewExtraIncomeView.as_view(), name='view_income'),
+    path('income/add/', AddExtraIncomeView.as_view(), name='add_income'),
+    path('expenses/', ViewExtraExpensesView.as_view(), name='view_expenses'),
+    path('expenses/add/', AddExtraExpensesView.as_view(), name='add_expenses'),
 ]

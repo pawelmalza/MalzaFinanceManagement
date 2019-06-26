@@ -5,6 +5,7 @@
 {% block content %}
     <div class="card">
     <div class="card-body">
+        <p class="card-title">{{ view }}</p>
     {{ message|safe }}
     <form method="post" enctype="multipart/form-data" class="card-body">
     {% csrf_token %}

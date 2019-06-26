@@ -54,7 +54,7 @@ class AddPurchaseAndSaleForm(forms.Form):
 
     goods = forms.ChoiceField()
     price_per_unit = forms.DecimalField()
-    quantity = forms.IntegerField()
+    quantity = forms.DecimalField()
 
 
 class AddNoteForm(forms.Form):
@@ -62,14 +62,7 @@ class AddNoteForm(forms.Form):
     content = forms.CharField(widget=forms.Textarea)
 
 
-class AddExtraIncome(forms.Form):
-    name = forms.CharField()
-    date = forms.DateField()
-    amount = forms.DecimalField()
-    description = forms.CharField(widget=forms.Textarea)
-
-
-class AddExtraExpense(forms.Form):
+class AddExtraForm(forms.Form):
     name = forms.CharField()
     date = forms.DateField()
     amount = forms.DecimalField()

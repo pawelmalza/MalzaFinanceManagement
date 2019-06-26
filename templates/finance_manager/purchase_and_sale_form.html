@@ -5,6 +5,7 @@
 {% block content %}
     <div class="card">
     <div class="card-body">
+    <p class="card-title">{{ view }} form:</p>
     <form method="post" class="dynamicForm form-group card-body">
         {% csrf_token %}
         {{ form }}
