@@ -51,5 +51,23 @@ class SalesGoods(models.Model):
     quantity_sold = models.BinaryField()
 
 
-class AddtionalCosts(models.Model):
-    pass
+class ExtraExpenses(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.BinaryField()
+    date = models.DateField()
+    amount = models.BinaryField()
+    description = models.BinaryField()
+
+
+class ExtraIncome(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.BinaryField()
+    date = models.DateField()
+    amount = models.BinaryField()
+    description = models.BinaryField()
+
+
+class Notes(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.BinaryField()
+    content = models.BinaryField()

@@ -1,11 +1,14 @@
 {% extends "finance_manager/base.html" %}
-
+{% block view %}Contractors{% endblock %}
 {% block content %}
-
-    <ul>
+<div class="card">
+<div class="card-body">
+<p class="card-title">Contractors</p>
+    <ul class="card-body">
     {% for contractor in contractors %}
-        <li>{{ contractor.name }}</li>
+        <li style="list-style: none;">{{ contractor.name }}</li>
     {% endfor %}
     </ul>
-
+</div>
+</div>
 {% endblock %}

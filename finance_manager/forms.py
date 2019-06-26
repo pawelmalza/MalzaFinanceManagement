@@ -1,7 +1,5 @@
 from django import forms
-from django.forms import formset_factory, Select
-
-from finance_manager.functions import get_user_contractors, get_user_goods
+from django.forms import formset_factory
 from finance_manager.validators import *
 
 
@@ -57,6 +55,25 @@ class AddPurchaseAndSaleForm(forms.Form):
     goods = forms.ChoiceField()
     price_per_unit = forms.DecimalField()
     quantity = forms.IntegerField()
+
+
+class AddNoteForm(forms.Form):
+    name = forms.CharField()
+    content = forms.CharField(widget=forms.Textarea)
+
+
+class AddExtraIncome(forms.Form):
+    name = forms.CharField()
+    date = forms.DateField()
+    amount = forms.DecimalField()
+    description = forms.CharField(widget=forms.Textarea)
+
+
+class AddExtraExpense(forms.Form):
+    name = forms.CharField()
+    date = forms.DateField()
+    amount = forms.DecimalField()
+    description = forms.CharField(widget=forms.Textarea)
 
 
 AddGoodsFormset = formset_factory(AddGoodsForm, extra=1)

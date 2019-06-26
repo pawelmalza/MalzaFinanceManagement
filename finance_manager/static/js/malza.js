@@ -10,5 +10,13 @@ $(function () {
         fieldSetToClone = fieldSetToClone.replace(/-(\d)-/gm,`-${ActualCounter}-`);
         dynamic_form_counter.attr('value', parseInt(ActualCounter)+1);
         dynamic_form_separator.before(fieldSetToClone);
-    })
+    });
+    var expand = $(".expand");
+    expand.each(function (index, element) {
+        $(element).on("click", function () {
+            var button = $(this);
+            var details = button.parent().next();
+            details.toggleClass("collapse");
+        })
+    });
 });

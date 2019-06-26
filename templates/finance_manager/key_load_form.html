@@ -1,8 +1,12 @@
 {% extends "finance_manager/base.html" %}
 
+{% block view %}{{ view }}{% endblock %}
+
 {% block content %}
+    <div class="card">
+    <div class="card-body">
     {{ message|safe }}
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" class="card-body">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="{{ submit }}">
@@ -10,5 +14,6 @@
     <p>{{ response|safe }}</p>
 
     <p>I don't have a key and want to generate one. <a href="/generate_key/">DOWNLOAD KEY</a> </p>
-
+    </div>
+    </div>
 {% endblock %}

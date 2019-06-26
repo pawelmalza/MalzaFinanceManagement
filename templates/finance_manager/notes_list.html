@@ -1,0 +1,19 @@
+{% extends "finance_manager/base.html" %}
+
+{% block view %}{{ view }}{% endblock %}
+
+{% block content %}
+<div class="card">
+<div class="card-body">
+    {% for item in data %}
+        <div class="card-header">
+        <h3 style="display: inline-block">{{ item.name }}</h3>
+        <a class="btn btn-primary mt-5 mt-xl-0 expand" style="display: inline-block">Details</a>
+        </div>
+        <div class="card-body collapse">
+        <p>{{ item.content }}</p>
+        </div>
+    {% endfor %}
+</div>
+</div>
+{% endblock %}

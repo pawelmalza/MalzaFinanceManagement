@@ -1,3 +1,6 @@
+from decimal import *
+from datetime import timedelta, date
+
 from django.contrib.auth.models import User
 from Crypto.Cipher import AES
 from Crypto import Random
@@ -102,7 +105,6 @@ def on_stock_add(key, item, quantity):
 def on_stock_remove(key, item, quantity):
     item = Goods.objects.get(id=item)
     item.on_stock = decrypt(key, item.on_stock)
-    print(item.on_stock)
     item.on_stock = int(item.on_stock) - int(quantity)
     item.on_stock = encrypt(key, item.on_stock)
     item.save()
@@ -110,7 +112,6 @@ def on_stock_remove(key, item, quantity):
 
 def get_user_sales(user, key):
     sales = Sales.objects.filter(user=user.id).order_by('date')
-    print(sales)
     for sale in sales:
         sale.contractor.name = decrypt(key, sale.contractor.name)
         sale.items = []
@@ -124,3 +125,47 @@ def get_user_sales(user, key):
             small_list.append(item.quantity_sold)
             sale.items.append(small_list)
     return sales
+
+
+def get_user_goods_table(user, key):
+    goods = Goods.objects.filter(user_id=user.id)
+    for item in goods:
+        item.name = decrypt(key, item.name)
+        item.on_stock = decrypt(key, item.on_stock)
+        item.units = decrypt(key, item.units)
+    return goods
+
+
+def get_user_notes(user, key):
+    notes = Notes.objects.filter(user_id=user.id)
+    for note in notes:
+        note.name = decrypt(key, note.name)
+        note.content = decrypt(key, note.content)
+    return notes
+
+
+def get_user_extra_income(user, key):
+    income = ExtraIncome.objects.filter(user_id=user.id)
+    for money in income:
+        money.name = decrypt(key, money.name)
+        money.amount = decrypt(key, money.amount)
+        money.description = decrypt(key, money.description)
+    return income
+
+
+def get_last_30_days_income(user, key):
+    getcontext().prec = 16
+    sales = Sales.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
+    incomes = ExtraIncome.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
+    last_30_days_income = 0
+    for sale in sales:
+        for price in sale.salesgoods_set.all():
+            price.price_per_unit = Decimal(decrypt(key, price.price_per_unit))
+            price.quantity_sold = Decimal(decrypt(key, price.quantity_sold))
+            paid = price.price_per_unit * price.quantity_sold
+            last_30_days_income += paid
+    for income in incomes:
+        last_30_days_income = last_30_days_income + 240000
+        income.amount = Decimal(decrypt(key, income.amount))
+        last_30_days_income = last_30_days_income + income.amount
+    return last_30_days_income

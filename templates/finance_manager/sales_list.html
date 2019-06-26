@@ -1,17 +1,26 @@
 {% extends "finance_manager/base.html" %}
 
+{% block view %}{{ view }}{% endblock %}
+
 {% block content %}
+    <div class="card">
+    <div class="card-body">
     {% for obj in obj_list %}
-        <div>
-            <p>Contractor: {{ obj.contractor.name }}</p>
-            <p>Transaction date: {{ obj.date }}</p>
-            <div class="collapse-toggle">
-                <table class="table-bordered">
+        <div class="card-header">
+            <h3>Contractor: {{ obj.contractor.name }}</h3>
+            <h4 style="display: inline-block">Transaction date: {{ obj.date }}</h4>
+            <a class="btn btn-primary mt-5 mt-xl-0 expand" style="display: inline-block">Details</a>
+        </div>
+            <div class="table collapse card-body">
+                <table class="table">
+                <thead>
                     <tr>
                         <th>Goods names</th>
                         <th>Prices per unit</th>
                         <th>Quantity sold</th>
                     </tr>
+                </thead>
+                <tbody
                     {% for item in obj.items %}
                         <tr>
                             {% for value in item %}
@@ -20,9 +29,12 @@
                         </tr>
                     {% endfor %}
                 </table>
+                </table>
             </div>
-        </div>
+
         <br>
     {% endfor %}
+    </div>
+    </div>
 
 {% endblock %}

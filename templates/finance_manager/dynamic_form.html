@@ -1,20 +1,26 @@
 {% extends "finance_manager/base.html" %}
 
+{% block view %}{{ view }}{% endblock %}
+
 {% block content %}
-    {{ message|safe }}
-    <form method="post" class="dynamicForm">
-        {% csrf_token %}
-        {{ formset.management_form }}
-        {% for form in formset %}
-            <div>
-                {{ form.as_table }}
-            </div>
-        {% endfor %}
-        <br id="separator">
-        <h3><a class="btn-primary" id="NewRow">Dodaj pozycje</a></h3>
-
-        <input type="submit" value="{{ submit }}">
-    </form>
-    <p>{{ response|safe }}</p>
-
+    <div class="card">
+        <div class="card-body">
+            {{ message|safe }}
+            <form method="post" class="dynamicForm card-body">
+                {% csrf_token %}
+                {{ formset.management_form }}
+                {% for form in formset %}
+                    <div>
+                        {{ form.as_table }}
+                    </div>
+                {% endfor %}
+                <br id="separator">
+                <a class="btn btn-light mt-2 mt-xl-0" id="NewRow">Add field</a>
+                <br>
+                <br>
+                <input class="btn btn-primary mt-2 mt-xl-0" type="submit" value="{{ submit }}">
+            </form>
+            <p>{{ response|safe }}</p>
+        </div>
+    </div>
 {% endblock %}
