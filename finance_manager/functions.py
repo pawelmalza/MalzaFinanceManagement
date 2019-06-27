@@ -66,7 +66,28 @@ def key_generator():
 
 
 def get_user_purchases(user, key):
-    purchases = Purchases.objects.filter(user=user.id).order_by('date')
+    purchases = Purchases.objects.filter(user=user.id).order_by('-date')
+    for purchase in purchases:
+        purchase.contractor.name = decrypt(key, purchase.contractor.name)
+        purchase.items = []
+        for item in purchase.purchasesgoods_set.all():
+            small_list = []
+            item.goods.name = decrypt(key, item.goods.name)
+            small_list.append(item.goods.name)
+            item.price_per_unit = decrypt(key, item.price_per_unit)
+            small_list.append(item.price_per_unit)
+            item.quantity_bought = decrypt(key, item.quantity_bought)
+            small_list.append(item.quantity_bought)
+            purchase.items.append(small_list)
+    return purchases
+
+
+def get_user_purchases_by_dates(user, key, date_from=None, date_to=None):
+    if date_from is None:
+        date_from = "1900-01-01"
+    if date_to is None:
+        date_to = date.today()
+    purchases = Purchases.objects.filter(user=user.id, date__gte=date_from, date__lte=date_to).order_by('-date')
     for purchase in purchases:
         purchase.contractor.name = decrypt(key, purchase.contractor.name)
         purchase.items = []
@@ -99,7 +120,28 @@ def on_stock_remove(key, item, quantity):
 
 
 def get_user_sales(user, key):
-    sales = Sales.objects.filter(user=user.id).order_by('date')
+    sales = Sales.objects.filter(user=user.id).order_by('-date')
+    for sale in sales:
+        sale.contractor.name = decrypt(key, sale.contractor.name)
+        sale.items = []
+        for item in sale.salesgoods_set.all():
+            small_list = []
+            item.goods.name = decrypt(key, item.goods.name)
+            small_list.append(item.goods.name)
+            item.price_per_unit = decrypt(key, item.price_per_unit)
+            small_list.append(item.price_per_unit)
+            item.quantity_sold = decrypt(key, item.quantity_sold)
+            small_list.append(item.quantity_sold)
+            sale.items.append(small_list)
+    return sales
+
+
+def get_user_sales_by_dates(user, key, date_from=None, date_to=None):
+    if date_from is None:
+        date_from = "1900-01-01"
+    if date_to is None:
+        date_to = date.today()
+    sales = Sales.objects.filter(user=user.id, date__gte=date_from, date__lte=date_to).order_by('-date')
     for sale in sales:
         sale.contractor.name = decrypt(key, sale.contractor.name)
         sale.items = []
@@ -141,8 +183,20 @@ def get_user_extra_income(user, key):
     return income
 
 
+def get_user_extra_income_by_date(user, key, date_from, date_to):
+    if date_from is None:
+        date_from = "1900-01-01"
+    if date_to is None:
+        date_to = date.today()
+    income = ExtraIncome.objects.filter(user_id=user.id, date__gte=date_from, date__lte=date_to)
+    for money in income:
+        money.name = decrypt(key, money.name)
+        money.amount = decrypt(key, money.amount)
+        money.description = decrypt(key, money.description)
+    return income
+
+
 def get_last_30_days_income(user, key):
-    # getcontext().prec = 16
     sales = Sales.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
     incomes = ExtraIncome.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
     last_30_days_income = 0
@@ -168,8 +222,20 @@ def get_user_extra_expenses(user, key):
     return expenses
 
 
+def get_user_extra_expenses_by_date(user, key, date_from, date_to):
+    if date_from is None:
+        date_from = "1900-01-01"
+    if date_to is None:
+        date_to = date.today()
+    expenses = ExtraExpenses.objects.filter(user_id=user.id, date__gte=date_from, date__lte=date_to)
+    for money in expenses:
+        money.name = decrypt(key, money.name)
+        money.amount = decrypt(key, money.amount)
+        money.description = decrypt(key, money.description)
+    return expenses
+
+
 def get_last_30_days_expenses(user, key):
-    # getcontext().prec = 16
     purchases = Purchases.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
     expenses = ExtraExpenses.objects.filter(user_id=user.id, date__gte=(date.today() - timedelta(30)))
     last_30_days_income = 0
@@ -184,3 +250,37 @@ def get_last_30_days_expenses(user, key):
         expense.amount = Decimal(decrypt(key, expense.amount))
         last_30_days_income = last_30_days_income + expense.amount
     return last_30_days_income
+
+
+def get_user_contractor_sales(user, key, contractor):
+    sales = Sales.objects.filter(user_id=user.id, contractor_id=contractor).order_by('-date')
+    for sale in sales:
+        sale.contractor.name = decrypt(key, sale.contractor.name)
+        sale.items = []
+        for item in sale.salesgoods_set.all():
+            small_list = []
+            item.goods.name = decrypt(key, item.goods.name)
+            small_list.append(item.goods.name)
+            item.price_per_unit = decrypt(key, item.price_per_unit)
+            small_list.append(item.price_per_unit)
+            item.quantity_sold = decrypt(key, item.quantity_sold)
+            small_list.append(item.quantity_sold)
+            sale.items.append(small_list)
+    return sales
+
+
+def get_user_contractor_purchases(user, key, contractor):
+    purchases = Purchases.objects.filter(user_id=user.id, contractor_id=contractor).order_by('-date')
+    for purchase in purchases:
+        purchase.contractor.name = decrypt(key, purchase.contractor.name)
+        purchase.items = []
+        for item in purchase.purchasesgoods_set.all():
+            small_list = []
+            item.goods.name = decrypt(key, item.goods.name)
+            small_list.append(item.goods.name)
+            item.price_per_unit = decrypt(key, item.price_per_unit)
+            small_list.append(item.price_per_unit)
+            item.quantity_bought = decrypt(key, item.quantity_bought)
+            small_list.append(item.quantity_bought)
+            purchase.items.append(small_list)
+    return purchases

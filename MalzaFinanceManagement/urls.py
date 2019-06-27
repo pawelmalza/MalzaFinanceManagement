@@ -18,6 +18,6 @@ from django.urls import path, include
 from finance_manager.views import *
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('wypierdalac/', admin.site.urls),
     path('', include('finance_manager.urls'))
 ]

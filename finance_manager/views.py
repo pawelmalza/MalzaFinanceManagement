@@ -207,12 +207,30 @@ class ViewPurchasesView(LoginRequiredMixin, View):
 
     def get(self, request):
         key = request.session['key']
+        form = SearchByDataForm()
         data = get_user_purchases(request.user, key)
         ctx = {
+            'form': form,
             "obj_list": data,
             "view": "Purchases"
         }
         return render(request, "finance_manager/purchases_list.html", ctx)
+
+    def post(self, request):
+        try:
+            key = request.session['key']
+            form = SearchByDataForm(request.POST)
+            if form.is_valid():
+                data = get_user_purchases_by_dates(request.user, key, form.cleaned_data.get('date_from'),
+                                                   form.cleaned_data.get('date_to'))
+                ctx = {
+                    "form": form,
+                    "obj_list": data,
+                    "view": "Purchases"
+                }
+                return render(request, "finance_manager/purchases_list.html", ctx)
+        except ValueError:
+            return redirect(reverse_lazy('view_purchases'))
 
 
 class AddPurchaseView(LoginRequiredMixin, View):
@@ -254,12 +272,30 @@ class ViewSalesView(LoginRequiredMixin, View):
 
     def get(self, request):
         key = request.session['key']
+        form = SearchByDataForm()
         data = get_user_sales(request.user, key)
         ctx = {
+            "form": form,
             "obj_list": data,
             "view": "Sales"
         }
         return render(request, "finance_manager/sales_list.html", ctx)
+
+    def post(self, request):
+        try:
+            key = request.session['key']
+            form = SearchByDataForm(request.POST)
+            if form.is_valid():
+                data = get_user_sales_by_dates(request.user, key, form.cleaned_data.get('date_from'),
+                                               form.cleaned_data.get('date_to'))
+                ctx = {
+                    "form": form,
+                    "obj_list": data,
+                    "view": "Sales"
+                }
+                return render(request, "finance_manager/sales_list.html", ctx)
+        except ValueError:
+            return redirect(reverse_lazy('view_sales'))
 
 
 class AddSaleView(LoginRequiredMixin, View):
@@ -280,6 +316,8 @@ class AddSaleView(LoginRequiredMixin, View):
     def post(self, request):
         key = request.session['key']
         date = request.POST.get('date')
+        print(date)
+        print(type(date))
         contractor = request.POST.get('contractor')
         forms_number = int(request.POST.get('form-TOTAL_FORMS'))
         sale = Sales.objects.create(user_id=request.user.id, contractor_id=contractor, date=date)
@@ -331,8 +369,22 @@ class ViewExtraIncomeView(View):
 
     def get(self, request):
         data = get_user_extra_income(request.user, request.session['key'])
-        ctx = {"data": data, "view": "Extra Income"}
+        form = SearchByDataForm()
+        ctx = {'form': form, "data": data, "view": "Extra Income"}
         return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
+
+    def post(self, request):
+        try:
+            key = request.session['key']
+            form = SearchByDataForm(request.POST)
+            if form.is_valid():
+                data = get_user_extra_income_by_date(request.user, key,
+                                                     form.cleaned_data.get('date_from'),
+                                                     form.cleaned_data.get('date_to'))
+                ctx = {'form': form, "data": data, "view": "Extra Income"}
+                return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
+        except ValueError:
+            return redirect(reverse_lazy('view_income'))
 
 
 class AddExtraIncomeView(View):
@@ -369,8 +421,21 @@ class ViewExtraExpensesView(View):
 
     def get(self, request):
         data = get_user_extra_expenses(request.user, request.session['key'])
-        ctx = {"data": data, "view": "Extra Expenses"}
+        form = SearchByDataForm()
+        ctx = {'form': form, "data": data, "view": "Extra Expenses"}
         return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
+
+    def post(self, request):
+        try:
+            key = request.session['key']
+            form = SearchByDataForm(request.POST)
+            if form.is_valid():
+                data = get_user_extra_expenses_by_date(request.user, key, form.cleaned_data.get('date_from'),
+                                                       form.cleaned_data.get('date_to'))
+                ctx = {'form': form, "data": data, "view": "Extra Expenses"}
+                return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
+        except ValueError:
+            return redirect(reverse_lazy('view_expenses'))
 
 
 class AddExtraExpensesView(View):
@@ -401,3 +466,18 @@ class AddExtraExpensesView(View):
             "view": "Extra Expenses"
         }
         return render(request, "finance_manager/generic_form.html", ctx)
+
+
+class ViewContractorPurchasesAndSalesView(View):
+
+    def get(self, request, contractor_id):
+        key = request.session['key']
+        purchases = get_user_contractor_purchases(request.user, key, contractor_id)
+        sales = get_user_contractor_sales(request.user, key, contractor_id)
+        view = f"{decrypt(key, Contractors.objects.get(id=contractor_id).name)} transactions"
+        ctx = {
+            'purchases': purchases,
+            'sales': sales,
+            'view': view
+        }
+        return render(request, 'finance_manager/contractor_transactions_list.html', ctx)

@@ -7,7 +7,7 @@
 <a class="btn btn-light mt-5 mt-xl-0 expand" style="display: inline-block; float: right;" href="add/">Add new</a>
     <ul class="card-body">
     {% for contractor in contractors %}
-        <li style="list-style: none;">{{ contractor.name }}</li>
+        <li style="list-style: none;"><a href="{{ contractor.id }}">{{ contractor.name }}</a></li>
     {% endfor %}
     </ul>
 </div>

@@ -4,43 +4,47 @@
 
 {% block content %}
     <div class="card">
-    <div class="card-body">
-    <p class="card-title">{{ view }} form:</p>
-    <form method="post" class="dynamicForm form-group pt-3 card-body">
-        {% csrf_token %}
-        {{ form }}
-        {{ formset.management_form }}
-        {% for element in formset %}
-            <div>
-                {{ element.as_table }}
-            </div>
-        {% endfor %}
-        <br id="separator">
-        <a class="btn btn-primary mt-2 mt-xl-0" id="NewRow">Add field</a>
-        <br>
-        <br>
-        <input class="btn btn-light mt-2 mt-xl-0" type="submit" value="{{ submit }}">
+        <div class="card-body">
+            <p class="card-title">{{ view }} form:</p>
 
-        <script>
-            $(function () {
-                var label = $('label[for="id_goods"]');
-                var div = label.parent();
-                var label_to_edit = label[0].outerHTML;
-                label_to_edit = label_to_edit.replace("id_goods", "id-form-0-goods");
-                label[0].outerHTML = label_to_edit;
-                div.children()[1].outerHTML = div.children()[1].outerHTML.replace("goods", "form-0-goods");
-                div.children()[1].outerHTML = div.children()[1].outerHTML.replace("id_goods", "id_form-0-goods");
-                div.children()[2].outerHTML = div.children()[2].outerHTML.replace("id_price_per_unit", "id_form-0-price_per_unit");
-                div.children()[3].outerHTML = div.children()[3].outerHTML.replace("price_per_unit", "form-0-price_per_unit");
-                div.children()[3].outerHTML = div.children()[3].outerHTML.replace("id_price_per_unit", "id_form-0-price_per_unit");
-                div.children()[4].outerHTML = div.children()[4].outerHTML.replace("id_quantity_bought", "id_form-0-quantity_bought");
-                div.children()[5].outerHTML = div.children()[5].outerHTML.replace("quantity", "form-0-quantity");
-                div.children()[5].outerHTML = div.children()[5].outerHTML.replace("id_quantity", "id_form-0-quantity");
+            <form method="post" class="dynamicForm form-group pt-3 card-body">
+                {% csrf_token %}
+                {{ form }}
+                {{ formset.management_form }}
+                {% for element in formset %}
+                    <div>
+                        {{ element.as_table }}
+                    </div>
+                {% endfor %}
+                <br id="separator">
+                <a class="btn btn-primary mt-2 mt-xl-0" id="NewRow">Add field</a>
 
-            })
-        </script>
+                <br>
+                <br>
+                <input class="btn btn-light mt-2 mt-xl-0" type="submit" value="{{ submit }}">
+                <br>
+                <a class="btn btn-warning mt-2 mt-xl-0" id="NewContractor" href="/contractors/add/">Add contractor</a>
+                <a class="btn btn-danger mt-2 mt-xl-0" id="NewGoods" href="/goods/add/">Add goods</a>
+                <script>
+                    $(function () {
+                        var label = $('label[for="id_goods"]');
+                        var div = label.parent();
+                        var label_to_edit = label[0].outerHTML;
+                        label_to_edit = label_to_edit.replace("id_goods", "id-form-0-goods");
+                        label[0].outerHTML = label_to_edit;
+                        div.children()[1].outerHTML = div.children()[1].outerHTML.replace("goods", "form-0-goods");
+                        div.children()[1].outerHTML = div.children()[1].outerHTML.replace("id_goods", "id_form-0-goods");
+                        div.children()[2].outerHTML = div.children()[2].outerHTML.replace("id_price_per_unit", "id_form-0-price_per_unit");
+                        div.children()[3].outerHTML = div.children()[3].outerHTML.replace("price_per_unit", "form-0-price_per_unit");
+                        div.children()[3].outerHTML = div.children()[3].outerHTML.replace("id_price_per_unit", "id_form-0-price_per_unit");
+                        div.children()[4].outerHTML = div.children()[4].outerHTML.replace("id_quantity_bought", "id_form-0-quantity_bought");
+                        div.children()[5].outerHTML = div.children()[5].outerHTML.replace("quantity", "form-0-quantity");
+                        div.children()[5].outerHTML = div.children()[5].outerHTML.replace("id_quantity", "id_form-0-quantity");
 
-    </form>
-    </div>
+                    })
+                </script>
+
+            </form>
+        </div>
     </div>
 {% endblock %}

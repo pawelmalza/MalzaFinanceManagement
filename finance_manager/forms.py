@@ -69,6 +69,11 @@ class AddExtraForm(forms.Form):
     description = forms.CharField(widget=forms.Textarea)
 
 
+class SearchByDataForm(forms.Form):
+    date_from = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'date_field'}))
+    date_to = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'date_field'}))
+
+
 AddGoodsFormset = formset_factory(AddGoodsForm, extra=1)
 AddContractorFormset = formset_factory(AddContractorForm, extra=1)
 AddPurchaseAndSaleFormset = formset_factory(AddPurchaseAndSaleForm, extra=1)
