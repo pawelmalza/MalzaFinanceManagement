@@ -33,8 +33,10 @@
                         {{ message|safe }}
                         <form class="pt-3" method="post">
                             <div class="form-group">
+                                <table>
                                 {% csrf_token %}
-                                {{ form.as_p }}
+                                {{ form.as_table }}
+                                </table>
                             </div>
                             <div class="mt-3">
                                 <input type="submit"

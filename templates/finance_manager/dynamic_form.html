@@ -12,7 +12,10 @@
                 {{ formset.management_form }}
                 {% for form in formset %}
                     <div>
+                    <table>
                         {{ form.as_table }}
+                        <br>
+                    </table>
                     </div>
                 {% endfor %}
                 <br id="separator">

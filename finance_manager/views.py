@@ -111,6 +111,8 @@ class MainScreenView(LoginRequiredMixin, View):
             return render(request, "finance_manager/base.html", ctx)
         except KeyError:
             return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
 
 
 class AddGoodsView(LoginRequiredMixin, View):
@@ -129,10 +131,17 @@ class AddGoodsView(LoginRequiredMixin, View):
         key = request.session['key']
         if formset.is_valid():
             for form in formset:
-                name = encrypt(key, form.cleaned_data.get('name'))
-                on_stock = encrypt(key, form.cleaned_data.get('on_stock'))
-                units = encrypt(key, form.cleaned_data.get('units'))
-                Goods.objects.create(user_id=request.user.id, name=name, on_stock=on_stock, units=units)
+                name = form.cleaned_data.get('name')
+                on_stock = form.cleaned_data.get('on_stock')
+                units = form.cleaned_data.get('units')
+                print(name)
+                print(on_stock)
+                print(units)
+                if (name is not None) and (units is not None) and (on_stock is not None):
+                    name = encrypt(key, name)
+                    on_stock = encrypt(key, on_stock)
+                    units = encrypt(key, units)
+                    Goods.objects.create(user_id=request.user.id, name=name, on_stock=on_stock, units=units)
             return redirect(reverse_lazy('view_goods'))
         ctx = {
             "formset": formset,
@@ -145,13 +154,18 @@ class AddGoodsView(LoginRequiredMixin, View):
 class ViewGoodsView(LoginRequiredMixin, View):
 
     def get(self, request):
-        goods = Goods.objects.filter(user_id=request.user.id)
-        key = request.session['key']
-        for item in goods:
-            item.name = decrypt(key, item.name.tobytes())
-            item.on_stock = decrypt(key, item.on_stock.tobytes())
-            item.units = decrypt(key, item.units.tobytes())
-        return render(request, "finance_manager/goods_list_template.html", {"goods": goods, "view": "Goods"})
+        try:
+            goods = Goods.objects.filter(user_id=request.user.id)
+            key = request.session['key']
+            for item in goods:
+                item.name = decrypt(key, item.name.tobytes())
+                item.on_stock = decrypt(key, item.on_stock.tobytes())
+                item.units = decrypt(key, item.units.tobytes())
+            return render(request, "finance_manager/goods_list_template.html", {"goods": goods, "view": "Goods"})
+        except KeyError:
+            return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
 
 
 class GenerateKeyView(LoginRequiredMixin, View):
@@ -167,12 +181,17 @@ class GenerateKeyView(LoginRequiredMixin, View):
 class ViewContractorsView(LoginRequiredMixin, View):
 
     def get(self, request):
-        contractors = Contractors.objects.filter(user_id=request.user.id)
-        key = request.session['key']
-        for contractor in contractors:
-            contractor.name = decrypt(key, contractor.name.tobytes())
-        return render(request, "finance_manager/contractors_list.html",
-                      {"contractors": contractors, "view": "contractors"})
+        try:
+            contractors = Contractors.objects.filter(user_id=request.user.id)
+            key = request.session['key']
+            for contractor in contractors:
+                contractor.name = decrypt(key, contractor.name.tobytes())
+            return render(request, "finance_manager/contractors_list.html",
+                          {"contractors": contractors, "view": "contractors"})
+        except KeyError:
+            return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
 
 
 class AddContractorsView(LoginRequiredMixin, View):
@@ -192,8 +211,10 @@ class AddContractorsView(LoginRequiredMixin, View):
         key = request.session['key']
         if formset.is_valid():
             for form in formset:
-                name = encrypt(key, form.cleaned_data.get('name'))
-                Contractors.objects.create(user_id=request.user.id, name=name)
+                name = form.cleaned_data.get('name')
+                if name is not None:
+                    name = encrypt(key, name)
+                    Contractors.objects.create(user_id=request.user.id, name=name)
             return redirect(reverse_lazy("view_contractors"))
         ctx = {
             "formset": formset,
@@ -206,15 +227,20 @@ class AddContractorsView(LoginRequiredMixin, View):
 class ViewPurchasesView(LoginRequiredMixin, View):
 
     def get(self, request):
-        key = request.session['key']
-        form = SearchByDataForm()
-        data = get_user_purchases(request.user, key)
-        ctx = {
-            'form': form,
-            "obj_list": data,
-            "view": "Purchases"
-        }
-        return render(request, "finance_manager/purchases_list.html", ctx)
+        try:
+            key = request.session['key']
+            form = SearchByDataForm()
+            data = get_user_purchases(request.user, key)
+            ctx = {
+                'form': form,
+                "obj_list": data,
+                "view": "Purchases"
+            }
+            return render(request, "finance_manager/purchases_list.html", ctx)
+        except KeyError:
+            return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
 
     def post(self, request):
         try:
@@ -253,33 +279,41 @@ class AddPurchaseView(LoginRequiredMixin, View):
         key = request.session['key']
         date = request.POST.get('date')
         contractor = request.POST.get('contractor')
-        print(request.POST)
         forms_number = int(request.POST.get('form-TOTAL_FORMS'))
         purchase = Purchases.objects.create(user_id=request.user.id, contractor_id=contractor, date=date)
+        purchase.money = 0
         for i in range(0, forms_number):
             goods = request.POST.get(f'form-{i}-goods')
             price_per_unit = request.POST.get(f'form-{i}-price_per_unit')
             quantity = request.POST.get(f'form-{i}-quantity')
+            purchase.money += Decimal(price_per_unit) * Decimal(quantity)
             on_stock_add(key, goods, quantity)
             price_per_unit = encrypt(key, price_per_unit)
             quantity = encrypt(key, quantity)
             PurchasesGoods.objects.create(purchase_id=purchase.id, goods_id=goods, price_per_unit=price_per_unit,
                                           quantity_bought=quantity)
+        purchase.money = encrypt(key, purchase.money)
+        purchase.save()
         return redirect(reverse_lazy("view_purchases"))
 
 
 class ViewSalesView(LoginRequiredMixin, View):
 
     def get(self, request):
-        key = request.session['key']
-        form = SearchByDataForm()
-        data = get_user_sales(request.user, key)
-        ctx = {
-            "form": form,
-            "obj_list": data,
-            "view": "Sales"
-        }
-        return render(request, "finance_manager/sales_list.html", ctx)
+        try:
+            key = request.session['key']
+            form = SearchByDataForm()
+            data = get_user_sales(request.user, key)
+            ctx = {
+                "form": form,
+                "obj_list": data,
+                "view": "Sales"
+            }
+            return render(request, "finance_manager/sales_list.html", ctx)
+        except KeyError:
+            return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
 
     def post(self, request):
         try:
@@ -316,30 +350,37 @@ class AddSaleView(LoginRequiredMixin, View):
     def post(self, request):
         key = request.session['key']
         date = request.POST.get('date')
-        print(date)
-        print(type(date))
         contractor = request.POST.get('contractor')
         forms_number = int(request.POST.get('form-TOTAL_FORMS'))
         sale = Sales.objects.create(user_id=request.user.id, contractor_id=contractor, date=date)
+        sale.money = 0
         for i in range(0, forms_number):
             goods = request.POST.get(f'form-{i}-goods')
             price_per_unit = request.POST.get(f'form-{i}-price_per_unit')
             quantity = request.POST.get(f'form-{i}-quantity')
+            sale.money += Decimal(price_per_unit) * Decimal(quantity)
             on_stock_remove(key, goods, quantity)
             price_per_unit = encrypt(key, price_per_unit)
             quantity = encrypt(key, quantity)
             SalesGoods.objects.create(sale_id=sale.id, goods_id=goods, price_per_unit=price_per_unit,
                                       quantity_sold=quantity)
+        sale.money = encrypt(key, sale.money)
+        sale.save()
         return redirect(reverse_lazy("view_sales"))
 
 
 class ViewNotesView(View):
 
     def get(self, request):
-        key = request.session['key']
-        data = get_user_notes(request.user, key)
-        ctx = {"data": data, "view": "Notes"}
-        return render(request, "finance_manager/notes_list.html", ctx)
+        try:
+            key = request.session['key']
+            data = get_user_notes(request.user, key)
+            ctx = {"data": data, "view": "Notes"}
+            return render(request, "finance_manager/notes_list.html", ctx)
+        except KeyError:
+            return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
 
 
 class AddNotesView(View):
@@ -368,10 +409,15 @@ class AddNotesView(View):
 class ViewExtraIncomeView(View):
 
     def get(self, request):
-        data = get_user_extra_income(request.user, request.session['key'])
-        form = SearchByDataForm()
-        ctx = {'form': form, "data": data, "view": "Extra Income"}
-        return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
+        try:
+            data = get_user_extra_income(request.user, request.session['key'])
+            form = SearchByDataForm()
+            ctx = {'form': form, "data": data, "view": "Extra Income"}
+            return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
+        except KeyError:
+            return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
 
     def post(self, request):
         try:
@@ -420,10 +466,15 @@ class AddExtraIncomeView(View):
 class ViewExtraExpensesView(View):
 
     def get(self, request):
-        data = get_user_extra_expenses(request.user, request.session['key'])
-        form = SearchByDataForm()
-        ctx = {'form': form, "data": data, "view": "Extra Expenses"}
-        return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
+        try:
+            data = get_user_extra_expenses(request.user, request.session['key'])
+            form = SearchByDataForm()
+            ctx = {'form': form, "data": data, "view": "Extra Expenses"}
+            return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
+        except KeyError:
+            return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
 
     def post(self, request):
         try:
@@ -471,13 +522,28 @@ class AddExtraExpensesView(View):
 class ViewContractorPurchasesAndSalesView(View):
 
     def get(self, request, contractor_id):
-        key = request.session['key']
-        purchases = get_user_contractor_purchases(request.user, key, contractor_id)
-        sales = get_user_contractor_sales(request.user, key, contractor_id)
-        view = f"{decrypt(key, Contractors.objects.get(id=contractor_id).name)} transactions"
-        ctx = {
-            'purchases': purchases,
-            'sales': sales,
-            'view': view
-        }
-        return render(request, 'finance_manager/contractor_transactions_list.html', ctx)
+        try:
+            key = request.session['key']
+            purchases = get_user_contractor_purchases(request.user, key, contractor_id)
+            sales = get_user_contractor_sales(request.user, key, contractor_id)
+            view = f"{decrypt(key, Contractors.objects.get(id=contractor_id).name)} transactions"
+            ctx = {
+                'purchases': purchases,
+                'sales': sales,
+                'view': view
+            }
+            return render(request, 'finance_manager/contractor_transactions_list.html', ctx)
+        except KeyError:
+            return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
+
+
+class DeleteContractorView(View):
+
+    def get(self, request, contractor_id):
+        contractor = Contractors.objects.get(id=contractor_id)
+        if request.user == contractor.user:
+            contractor.delete()
+            return redirect(reverse_lazy('view_contractors'))
+        return redirect(reverse_lazy('view_contractors'))

@@ -69,6 +69,7 @@ def get_user_purchases(user, key):
     purchases = Purchases.objects.filter(user=user.id).order_by('-date')
     for purchase in purchases:
         purchase.contractor.name = decrypt(key, purchase.contractor.name)
+        purchase.money = decrypt(key, purchase.money)
         purchase.items = []
         for item in purchase.purchasesgoods_set.all():
             small_list = []
@@ -90,6 +91,7 @@ def get_user_purchases_by_dates(user, key, date_from=None, date_to=None):
     purchases = Purchases.objects.filter(user=user.id, date__gte=date_from, date__lte=date_to).order_by('-date')
     for purchase in purchases:
         purchase.contractor.name = decrypt(key, purchase.contractor.name)
+        purchase.money = decrypt(key, purchase.money)
         purchase.items = []
         for item in purchase.purchasesgoods_set.all():
             small_list = []
@@ -123,6 +125,7 @@ def get_user_sales(user, key):
     sales = Sales.objects.filter(user=user.id).order_by('-date')
     for sale in sales:
         sale.contractor.name = decrypt(key, sale.contractor.name)
+        sale.money = decrypt(key, sale.money)
         sale.items = []
         for item in sale.salesgoods_set.all():
             small_list = []
@@ -144,6 +147,7 @@ def get_user_sales_by_dates(user, key, date_from=None, date_to=None):
     sales = Sales.objects.filter(user=user.id, date__gte=date_from, date__lte=date_to).order_by('-date')
     for sale in sales:
         sale.contractor.name = decrypt(key, sale.contractor.name)
+        sale.money = decrypt(key, sale.money)
         sale.items = []
         for item in sale.salesgoods_set.all():
             small_list = []
@@ -256,6 +260,7 @@ def get_user_contractor_sales(user, key, contractor):
     sales = Sales.objects.filter(user_id=user.id, contractor_id=contractor).order_by('-date')
     for sale in sales:
         sale.contractor.name = decrypt(key, sale.contractor.name)
+        sale.money = decrypt(key, sale.money)
         sale.items = []
         for item in sale.salesgoods_set.all():
             small_list = []
@@ -273,6 +278,7 @@ def get_user_contractor_purchases(user, key, contractor):
     purchases = Purchases.objects.filter(user_id=user.id, contractor_id=contractor).order_by('-date')
     for purchase in purchases:
         purchase.contractor.name = decrypt(key, purchase.contractor.name)
+        purchase.money = decrypt(key, purchase.money)
         purchase.items = []
         for item in purchase.purchasesgoods_set.all():
             small_list = []

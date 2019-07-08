@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Contractors(models.Model):
@@ -18,7 +20,6 @@ class Goods(models.Model):
     name = models.BinaryField()
     on_stock = models.BinaryField()
     units = models.BinaryField()
-    # PROCENT PROFIT
 
 
 class Purchases(models.Model):
@@ -26,7 +27,7 @@ class Purchases(models.Model):
     contractor = models.ForeignKey(Contractors, on_delete=models.CASCADE)
     goods = models.ManyToManyField(Goods, through='PurchasesGoods')
     date = models.DateField()
-    # DODAC DODATKOWE KOSZTY W FORMULARZU
+    money = models.BinaryField()
 
 
 class PurchasesGoods(models.Model):
@@ -41,6 +42,7 @@ class Sales(models.Model):
     contractor = models.ForeignKey(Contractors, on_delete=models.CASCADE)
     goods = models.ManyToManyField(Goods, through='SalesGoods')
     date = models.DateField()
+    money = models.BinaryField()
     # DODAC DODATKOWE KOSZTY W FORMULARZU
 
 
@@ -71,3 +73,19 @@ class Notes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.BinaryField()
     content = models.BinaryField()
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    currency = models.CharField(max_length=10, default="EUR")
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()

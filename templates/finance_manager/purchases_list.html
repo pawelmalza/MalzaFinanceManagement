@@ -8,8 +8,10 @@
     <div class="card-body">
         <p class="card-title">Search Purchases:</p>
         <form method="post" class="card-body, form-group">
+            <table>
             {% csrf_token %}
-            {{ form.as_p }}
+            {{ form.as_table }}
+            </table>
             <input type="submit" class="btn btn-light mt-2 mt-xl-0" value="Search!">
         </form>
     </div>
@@ -46,6 +48,9 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                <div style="display: inline-block; float: right">
+                    <h4>Total: {{ obj.money }} PLN</h4>
+                </div>
                 </div>
 
                 <br>

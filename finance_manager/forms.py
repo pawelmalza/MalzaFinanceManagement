@@ -1,6 +1,8 @@
 from django import forms
 from django.forms import formset_factory
 from finance_manager.validators import *
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 
 
 class RegisterForm(forms.Form):
@@ -20,6 +22,12 @@ class RegisterForm(forms.Form):
 class LoginFrom(forms.Form):
     login = forms.CharField(max_length=64)
     password = forms.CharField(max_length=64, widget=forms.PasswordInput)
+
+    def __init__(self, *args, **kwargs):
+        super(LoginFrom, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_class = "form-group"
+        self.helper.add_input(Submit('submit', 'Submit'))
 
 
 class LoadEncryptionKeyForm(forms.Form):

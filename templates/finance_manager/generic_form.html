@@ -4,16 +4,18 @@
 
 {% block content %}
     <div class="card">
-    <div class="card-body">
-        <p class="card-title">{{ view }} form:</p>
-    {{ message|safe }}
-    <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" class="btn btn-light mt-2 mt-xl-0" value="{{ submit }}">
-    </form>
-    <p>{{ response|safe }}</p>
-    </div>
+        <div class="card-body">
+            <p class="card-title">{{ view }} form:</p>
+            {{ message|safe }}
+            <form method="post">
+                <table>
+                    {% csrf_token %}
+                    {{ form.as_table }}
+                </table>
+                <input type="submit" class="btn btn-light mt-2 mt-xl-0" value="{{ submit }}">
+            </form>
+            <p>{{ response|safe }}</p>
+        </div>
     </div>
 
 {% endblock %}

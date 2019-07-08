@@ -9,7 +9,9 @@
 
             <form method="post" class="dynamicForm form-group pt-3 card-body">
                 {% csrf_token %}
-                {{ form }}
+                {{ form.as_table }}
+                <br>
+                <br>
                 {{ formset.management_form }}
                 {% for element in formset %}
                     <div>
@@ -43,7 +45,6 @@
 
                     })
                 </script>
-
             </form>
         </div>
     </div>

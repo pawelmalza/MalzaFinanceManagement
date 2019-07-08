@@ -42,6 +42,5 @@ $(function () {
             });
         });
     };
-    date_field.forceNumeric();
-    date_field_class.forceNumeric();
+
 });

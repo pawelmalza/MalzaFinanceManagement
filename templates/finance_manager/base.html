@@ -38,9 +38,13 @@
 
                 <li class="nav-item nav-profile dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
-                        <span class="nav-profile-name">{{ user_name }}</span>
+                        <span class="nav-profile-name">{{ user.username }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
+                        <a class="dropdown-item" href="/settings">
+                            <i class="mdi mdi-settings text-primary"></i>
+                            Settings
+                        </a>
                         <a class="dropdown-item" href="/logout">
                             <i class="mdi mdi-logout text-primary"></i>
                             Logout
@@ -144,7 +148,7 @@
                                                     <i class="mdi mdi-finance mr-3 icon-lg text-success"></i>
                                                     <div class="d-flex flex-column justify-content-around">
                                                         <small class="mb-1 text-muted">Income</small>
-                                                        <h6 class="mr-2 mb-0">{{ last_30_days_income }} PLN</h6>
+                                                        <h6 class="mr-2 mb-0">{{ last_30_days_income }} {{ user.profile.currency }}</h6>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex border-md-right flex-grow-1 align-items-center justify-content-center p-3 item">
@@ -203,6 +207,7 @@
                 <div class="d-sm-flex justify-content-center justify-content-sm-between">
                     <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2018 <a
                             href="https://www.urbanui.com/" target="_blank">Urbanui</a>. All rights reserved.</span>
+                    <span class="text-muted text-center text-sm-center d-block d-sm-inline-block">Version {{ version }}</span>
                     <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i
                             class="mdi mdi-heart text-danger"></i></span>
                 </div>

@@ -42,10 +42,14 @@
                     {% endfor %}
                 </tbody>
                 </table>
+            <div style="display: inline-block; float: right">
+                    <h4>Total: {{ obj.money }} PLN</h4>
+                </div>
             </div>
 
         <br>
     {% endfor %}
+
 </td>
 <td style="vertical-align: top; width: 50%;">
     {% for obj in sales %}
@@ -73,6 +77,9 @@
                     {% endfor %}
                 </tbody>
                 </table>
+            <div style="display: inline-block; float: right">
+                    <h4>Total: {{ obj.money }} PLN</h4>
+                </div>
             </div>
 
         <br>

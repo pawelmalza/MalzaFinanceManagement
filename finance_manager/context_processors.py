@@ -2,8 +2,8 @@ from django.utils import timezone
 
 
 def my_context_processor(request):
-    version = (0,2)
+    version = "0.5"
     time = timezone.now()
-    user_name = request.user.username
+    user = request.user
 
-    return {"version": version, "time": time, "user_name": user_name}
+    return {"version": version, "time": time, "user": user}
