@@ -82,6 +82,10 @@ class SearchByDataForm(forms.Form):
     date_to = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'date_field'}))
 
 
+class ProfileSettingsForm(forms.Form):
+    currency = forms.CharField(max_length=10)
+
+
 AddGoodsFormset = formset_factory(AddGoodsForm, extra=1)
 AddContractorFormset = formset_factory(AddContractorForm, extra=1)
 AddPurchaseAndSaleFormset = formset_factory(AddPurchaseAndSaleForm, extra=1)

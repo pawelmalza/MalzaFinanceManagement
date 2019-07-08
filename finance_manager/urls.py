@@ -25,4 +25,5 @@ urlpatterns = [
     path('income/add/', AddExtraIncomeView.as_view(), name='add_income'),
     path('expenses/', ViewExtraExpensesView.as_view(), name='view_expenses'),
     path('expenses/add/', AddExtraExpensesView.as_view(), name='add_expenses'),
+    path('settings/', ProfileSettingsView.as_view(), name='settings'),
 ]

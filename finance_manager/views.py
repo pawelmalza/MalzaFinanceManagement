@@ -547,3 +547,22 @@ class DeleteContractorView(View):
             contractor.delete()
             return redirect(reverse_lazy('view_contractors'))
         return redirect(reverse_lazy('view_contractors'))
+
+
+class ProfileSettingsView(View):
+
+    def get(self, request):
+        user = User.objects.get(id=request.user.id)
+        initial = {'currency': user.profile.currency}
+        form = ProfileSettingsForm(initial=initial)
+        return render(request, 'finance_manager/generic_form.html', {'form': form, 'submit': 'Set'})
+
+    def post(self, request):
+        user = User.objects.get(id=request.user.id)
+        form = ProfileSettingsForm(request.POST)
+        if form.is_valid():
+            currency = form.cleaned_data.get('currency')
+            user.profile.currency = currency
+            user.profile.save()
+            return redirect(reverse_lazy('main_screen'))
+        return redirect(reverse_lazy('settings'))

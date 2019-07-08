@@ -27,12 +27,14 @@
         <div class="navbar-brand-wrapper d-flex justify-content-center">
             <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
                 <a class="navbar-brand brand-logo" href="/main/"><img src="{% static "images/logo.svg" %}" alt="logo"/></a>
-                <a class="navbar-brand brand-logo-mini" href="/main/"><img src="{% static "images/logo-mini.svg" %}" alt="logo"/></a>
+                <a class="navbar-brand brand-logo-mini" href="/main/"><img src="{% static "images/logo-mini.svg" %}"
+                                                                           alt="logo"/></a>
             </div>
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
             <ul class="navbar-nav">
-                <li class="nav-item"><strong style="color: #0e4cfd">{% block view %}Dashboard{% endblock %}</strong></li>
+                <li class="nav-item"><strong style="color: #0e4cfd">{% block view %}Dashboard{% endblock %}</strong>
+                </li>
             </ul>
             <ul class="navbar-nav navbar-nav-right">
 
@@ -116,18 +118,6 @@
             <div class="content-wrapper">
                 {% block content %}
                     <div class="row">
-                        <div class="col-md-12 grid-margin">
-                            <div class="d-flex justify-content-between flex-wrap">
-                                <div class="d-flex align-items-end flex-wrap">
-                                </div>
-                                <div class="d-flex justify-content-between align-items-end flex-wrap">
-                                    <a class="btn btn-primary mt-2 mt-xl-0" href="/load_key/">Load Key</a>
-                                    <a class="btn btn-primary mt-2 mt-xl-0" href="/generate_key/">Download New Key</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body dashboard-tabs p-0">
@@ -155,14 +145,14 @@
                                                     <i class="mdi mdi-finance mr-3 icon-lg text-danger"></i>
                                                     <div class="d-flex flex-column justify-content-around">
                                                         <small class="mb-1 text-muted">Spendings</small>
-                                                        <h5 class="mr-2 mb-0">{{ last_30_days_expenses }} PLN</h5>
+                                                        <h5 class="mr-2 mb-0">{{ last_30_days_expenses }} {{ user.profile.currency }}</h5>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex border-md-right flex-grow-1 align-items-center justify-content-center p-3 item">
                                                     <i class="mdi mdi-finance mr-3 icon-lg text-primary"></i>
                                                     <div class="d-flex flex-column justify-content-around">
                                                         <small class="mb-1 text-muted">Balance</small>
-                                                        <h5 class="mr-2 mb-0">{{ last_30_days_balance }} PLN</h5>
+                                                        <h5 class="mr-2 mb-0">{{ last_30_days_balance }} {{ user.profile.currency }}</h5>
                                                     </div>
                                                 </div>
                                             </div>
