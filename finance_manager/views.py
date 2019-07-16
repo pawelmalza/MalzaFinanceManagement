@@ -98,8 +98,8 @@ class MainScreenView(LoginRequiredMixin, View):
     def get(self, request):
         try:
             goods = get_user_goods_table(request.user, request.session['key'])
-            last_30_days_income = get_last_30_days_income(request.user, request.session['key'])
-            last_30_days_expenses = get_last_30_days_expenses(request.user, request.session['key'])
+            last_30_days_income = GetIncome.last_30_days(request.user, request.session['key'])
+            last_30_days_expenses = GetExpenses.last_30_days(request.user, request.session['key'])
             last_30_days_balance = last_30_days_income - last_30_days_expenses
             ctx = {
                 'goods': goods,
@@ -134,9 +134,6 @@ class AddGoodsView(LoginRequiredMixin, View):
                 name = form.cleaned_data.get('name')
                 on_stock = form.cleaned_data.get('on_stock')
                 units = form.cleaned_data.get('units')
-                print(name)
-                print(on_stock)
-                print(units)
                 if (name is not None) and (units is not None) and (on_stock is not None):
                     name = encrypt(key, name)
                     on_stock = encrypt(key, on_stock)
@@ -155,12 +152,8 @@ class ViewGoodsView(LoginRequiredMixin, View):
 
     def get(self, request):
         try:
-            goods = Goods.objects.filter(user_id=request.user.id)
             key = request.session['key']
-            for item in goods:
-                item.name = decrypt(key, item.name.tobytes())
-                item.on_stock = decrypt(key, item.on_stock.tobytes())
-                item.units = decrypt(key, item.units.tobytes())
+            goods = get_user_goods_table(request.user, key)
             return render(request, "finance_manager/goods_list_template.html", {"goods": goods, "view": "Goods"})
         except KeyError:
             return redirect(reverse_lazy('load_key'))
@@ -182,10 +175,8 @@ class ViewContractorsView(LoginRequiredMixin, View):
 
     def get(self, request):
         try:
-            contractors = Contractors.objects.filter(user_id=request.user.id)
             key = request.session['key']
-            for contractor in contractors:
-                contractor.name = decrypt(key, contractor.name.tobytes())
+            contractors = GetContractors.all(request.user, key)
             return render(request, "finance_manager/contractors_list.html",
                           {"contractors": contractors, "view": "contractors"})
         except KeyError:
@@ -230,7 +221,7 @@ class ViewPurchasesView(LoginRequiredMixin, View):
         try:
             key = request.session['key']
             form = SearchByDataForm()
-            data = get_user_purchases(request.user, key)
+            data = GetPurchases.all(request.user, key)
             ctx = {
                 'form': form,
                 "obj_list": data,
@@ -247,8 +238,8 @@ class ViewPurchasesView(LoginRequiredMixin, View):
             key = request.session['key']
             form = SearchByDataForm(request.POST)
             if form.is_valid():
-                data = get_user_purchases_by_dates(request.user, key, form.cleaned_data.get('date_from'),
-                                                   form.cleaned_data.get('date_to'))
+                data = GetPurchases.by_dates(request.user, key, form.cleaned_data.get('date_from'),
+                                             form.cleaned_data.get('date_to'))
                 ctx = {
                     "form": form,
                     "obj_list": data,
@@ -262,7 +253,7 @@ class ViewPurchasesView(LoginRequiredMixin, View):
 class AddPurchaseView(LoginRequiredMixin, View):
 
     def get(self, request):
-        contractors = get_user_contractors(request.user, request.session['key'])
+        contractors = GetContractors.choices(request.user, request.session['key'])
         goods = get_user_goods(request.user, request.session['key'])
         form = SelectContractorAndDateForm(contractors=contractors)
         formset = AddPurchaseAndSaleFormset(request.GET or None, form_kwargs={"goods": goods})
@@ -287,7 +278,7 @@ class AddPurchaseView(LoginRequiredMixin, View):
             price_per_unit = request.POST.get(f'form-{i}-price_per_unit')
             quantity = request.POST.get(f'form-{i}-quantity')
             purchase.money += Decimal(price_per_unit) * Decimal(quantity)
-            on_stock_add(key, goods, quantity)
+            GetPurchases.add_to_stock(key, goods, quantity)
             price_per_unit = encrypt(key, price_per_unit)
             quantity = encrypt(key, quantity)
             PurchasesGoods.objects.create(purchase_id=purchase.id, goods_id=goods, price_per_unit=price_per_unit,
@@ -303,7 +294,7 @@ class ViewSalesView(LoginRequiredMixin, View):
         try:
             key = request.session['key']
             form = SearchByDataForm()
-            data = get_user_sales(request.user, key)
+            data = GetSales.all(request.user, key)
             ctx = {
                 "form": form,
                 "obj_list": data,
@@ -320,8 +311,8 @@ class ViewSalesView(LoginRequiredMixin, View):
             key = request.session['key']
             form = SearchByDataForm(request.POST)
             if form.is_valid():
-                data = get_user_sales_by_dates(request.user, key, form.cleaned_data.get('date_from'),
-                                               form.cleaned_data.get('date_to'))
+                data = GetSales.by_dates(request.user, key, form.cleaned_data.get('date_from'),
+                                         form.cleaned_data.get('date_to'))
                 ctx = {
                     "form": form,
                     "obj_list": data,
@@ -335,7 +326,7 @@ class ViewSalesView(LoginRequiredMixin, View):
 class AddSaleView(LoginRequiredMixin, View):
 
     def get(self, request):
-        contractors = get_user_contractors(request.user, request.session['key'])
+        contractors = GetContractors.choices(request.user, request.session['key'])
         goods = get_user_goods(request.user, request.session['key'])
         form = SelectContractorAndDateForm(contractors=contractors)
         formset = AddPurchaseAndSaleFormset(request.GET or None, form_kwargs={"goods": goods})
@@ -359,7 +350,7 @@ class AddSaleView(LoginRequiredMixin, View):
             price_per_unit = request.POST.get(f'form-{i}-price_per_unit')
             quantity = request.POST.get(f'form-{i}-quantity')
             sale.money += Decimal(price_per_unit) * Decimal(quantity)
-            on_stock_remove(key, goods, quantity)
+            GetSales.remove_from_stock(key, goods, quantity)
             price_per_unit = encrypt(key, price_per_unit)
             quantity = encrypt(key, quantity)
             SalesGoods.objects.create(sale_id=sale.id, goods_id=goods, price_per_unit=price_per_unit,
@@ -410,7 +401,7 @@ class ViewExtraIncomeView(View):
 
     def get(self, request):
         try:
-            data = get_user_extra_income(request.user, request.session['key'])
+            data = GetIncome.extra_all(request.user, request.session['key'])
             form = SearchByDataForm()
             ctx = {'form': form, "data": data, "view": "Extra Income"}
             return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
@@ -424,9 +415,9 @@ class ViewExtraIncomeView(View):
             key = request.session['key']
             form = SearchByDataForm(request.POST)
             if form.is_valid():
-                data = get_user_extra_income_by_date(request.user, key,
-                                                     form.cleaned_data.get('date_from'),
-                                                     form.cleaned_data.get('date_to'))
+                data = GetIncome.extra_by_date(request.user, key,
+                                               form.cleaned_data.get('date_from'),
+                                               form.cleaned_data.get('date_to'))
                 ctx = {'form': form, "data": data, "view": "Extra Income"}
                 return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
         except ValueError:
@@ -467,7 +458,7 @@ class ViewExtraExpensesView(View):
 
     def get(self, request):
         try:
-            data = get_user_extra_expenses(request.user, request.session['key'])
+            data = GetExpenses.extra_all(request.user, request.session['key'])
             form = SearchByDataForm()
             ctx = {'form': form, "data": data, "view": "Extra Expenses"}
             return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
@@ -481,8 +472,8 @@ class ViewExtraExpensesView(View):
             key = request.session['key']
             form = SearchByDataForm(request.POST)
             if form.is_valid():
-                data = get_user_extra_expenses_by_date(request.user, key, form.cleaned_data.get('date_from'),
-                                                       form.cleaned_data.get('date_to'))
+                data = GetExpenses.extra_by_date(request.user, key, form.cleaned_data.get('date_from'),
+                                                 form.cleaned_data.get('date_to'))
                 ctx = {'form': form, "data": data, "view": "Extra Expenses"}
                 return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
         except ValueError:
@@ -524,8 +515,8 @@ class ViewContractorPurchasesAndSalesView(View):
     def get(self, request, contractor_id):
         try:
             key = request.session['key']
-            purchases = get_user_contractor_purchases(request.user, key, contractor_id)
-            sales = get_user_contractor_sales(request.user, key, contractor_id)
+            purchases = GetContractors.purchases(request.user, key, contractor_id)
+            sales = GetContractors.sales(request.user, key, contractor_id)
             view = f"{decrypt(key, Contractors.objects.get(id=contractor_id).name)} transactions"
             ctx = {
                 'purchases': purchases,
