@@ -11,7 +11,7 @@
             {% for item in data %}
                 <div class="card-header">
                     <h3 style="display: inline-block">{{ item.name }}</h3>
-                    <a class="btn btn-primary mt-5 mt-xl-0 expand" style="display: inline-block">Details</a>
+                    <a class="btn btn-primary mt-5 mt-xl-0 expand" style="display: inline-block">Details</a><a class="btn btn-danger mt-5 mt-xl-0 expand" style="display: inline-block; float: right" href="delete/{{ item.id }}">Delete</a>
                 </div>
                 <div class="card-body collapse">
                     <p>{{ item.content }}</p>

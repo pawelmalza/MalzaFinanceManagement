@@ -77,7 +77,7 @@ class AddExtraForm(forms.Form):
     description = forms.CharField(widget=forms.Textarea)
 
 
-class SearchByDataForm(forms.Form):
+class SearchByDateForm(forms.Form):
     date_from = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'date_field'}))
     date_to = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'date_field'}))
 

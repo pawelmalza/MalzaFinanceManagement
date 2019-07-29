@@ -1,0 +1,127 @@
+{% extends "finance_manager/base.html" %}
+
+{% block view %}{{ item_data.name }} transactions list:{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+
+
+            <p class="card-title">Filter by date:</p>
+            <form method="post" class="card-body, form-group">
+                <table>
+                    {% csrf_token %}
+                    {{ form.as_table }}
+                </table>
+                <input type="submit" class="btn btn-light mt-2 mt-xl-0" value="Search!">
+            </form>
+            <p class="card-title" style="display: inline-block">{{ item_data.name }} (<strong>{{ item_data.on_stock }} {{ item_data.units }}</strong> on stock):</p>
+            <table style="width: 100%">
+                <thead>
+                <tr>
+                    <th><strong>Purchases</strong></th>
+                    <th><strong>Sales</strong></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td style="vertical-align: top; width: 50%;">
+                        {% for obj in purchases %}
+
+                            <div class="card-header">
+                                <h3>Contractor: {{ obj.contractor.name }}</h3>
+                                <h4 style="display: inline-block">Transaction date: {{ obj.date }}</h4>
+                                <a class="btn btn-primary mt-5 mt-xl-0 expand" style="display: inline-block">Details</a>
+                            </div>
+                            <div class="table collapse card-body">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Goods names</th>
+                                        <th>Prices per unit</th>
+                                        <th>Quantity bought</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for item in obj.items %}
+                                        <tr>
+                                            {% for value in item %}
+                                                <td>{{ value }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div style="display: inline-block; float: right">
+                                    <h4>Total paid
+                                        for {{ item_data.name }}: {{ obj.for_product }} {{ user.profile.currency }}</h4>
+                                </div>
+                            </div>
+
+                            <br>
+                        {% endfor %}
+
+                    </td>
+                    <td style="vertical-align: top; width: 50%;">
+                        {% for obj in sales %}
+                            <div class="card-header" style="position: relative">
+                                <h3>Contractor: {{ obj.contractor.name }}</h3>
+                                <h4 style="display: inline-block">Transaction date: {{ obj.date }}</h4>
+                                <a class="btn btn-primary mt-5 mt-xl-0 expand" style="display: inline-block">Details</a>
+                            </div>
+                            <div class="table collapse card-body">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Goods names</th>
+                                        <th>Prices per unit</th>
+                                        <th>Quantity sold</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for item in obj.items %}
+                                        <tr>
+                                            {% for value in item %}
+                                                <td>{{ value }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div style="display: inline-block; float: right">
+                                    <h5>Total earned
+                                        for {{ item_data.name }}: {{ obj.for_product }} {{ user.profile.currency }}</h5>
+                                </div>
+                            </div>
+
+                            <br>
+                        {% endfor %}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card" style="margin-top: 2%">
+        <div class="card-body">
+            <p class="card-title">Financial data:</p>
+            <table style="width: 50%;">
+                <tbody>
+                <tr>
+                    <th>Total paid:</th>
+                    <th>Total earned:</th>
+                    <th>Balance:</th>
+                    <th>Profit:</th>
+                </tr>
+                <tr>
+                    <td>{{ total_paid }}</td>
+                    <td>{{ total_earned }}</td>
+                    <td>{{ balance }}</td>
+                    <td>{{ profit }}%</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

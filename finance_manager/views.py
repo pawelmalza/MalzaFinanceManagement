@@ -97,7 +97,7 @@ class MainScreenView(LoginRequiredMixin, View):
 
     def get(self, request):
         try:
-            goods = get_user_goods_table(request.user, request.session['key'])
+            goods = GetGoods.all(request.user, request.session['key'])
             last_30_days_income = GetIncome.last_30_days(request.user, request.session['key'])
             last_30_days_expenses = GetExpenses.last_30_days(request.user, request.session['key'])
             last_30_days_balance = last_30_days_income - last_30_days_expenses
@@ -135,9 +135,9 @@ class AddGoodsView(LoginRequiredMixin, View):
                 on_stock = form.cleaned_data.get('on_stock')
                 units = form.cleaned_data.get('units')
                 if (name is not None) and (units is not None) and (on_stock is not None):
-                    name = encrypt(key, name)
-                    on_stock = encrypt(key, on_stock)
-                    units = encrypt(key, units)
+                    name = Encryption.encrypt(key, name)
+                    on_stock = Encryption.encrypt(key, on_stock)
+                    units = Encryption.encrypt(key, units)
                     Goods.objects.create(user_id=request.user.id, name=name, on_stock=on_stock, units=units)
             return redirect(reverse_lazy('view_goods'))
         ctx = {
@@ -153,7 +153,7 @@ class ViewGoodsView(LoginRequiredMixin, View):
     def get(self, request):
         try:
             key = request.session['key']
-            goods = get_user_goods_table(request.user, key)
+            goods = GetGoods.all(request.user, key)
             return render(request, "finance_manager/goods_list_template.html", {"goods": goods, "view": "Goods"})
         except KeyError:
             return redirect(reverse_lazy('load_key'))
@@ -164,7 +164,7 @@ class ViewGoodsView(LoginRequiredMixin, View):
 class GenerateKeyView(LoginRequiredMixin, View):
 
     def get(self, request):
-        generated_key = key_generator()
+        generated_key = Encryption.key_generator()
         generated_key = io.BytesIO(generated_key)
         response = HttpResponse(generated_key.read(), content_type='application/malza')
         response['Content-Disposition'] = 'attachment; filename="{}"'.format("key.malza")
@@ -204,7 +204,7 @@ class AddContractorsView(LoginRequiredMixin, View):
             for form in formset:
                 name = form.cleaned_data.get('name')
                 if name is not None:
-                    name = encrypt(key, name)
+                    name = Encryption.encrypt(key, name)
                     Contractors.objects.create(user_id=request.user.id, name=name)
             return redirect(reverse_lazy("view_contractors"))
         ctx = {
@@ -220,7 +220,7 @@ class ViewPurchasesView(LoginRequiredMixin, View):
     def get(self, request):
         try:
             key = request.session['key']
-            form = SearchByDataForm()
+            form = SearchByDateForm()
             data = GetPurchases.all(request.user, key)
             ctx = {
                 'form': form,
@@ -236,7 +236,7 @@ class ViewPurchasesView(LoginRequiredMixin, View):
     def post(self, request):
         try:
             key = request.session['key']
-            form = SearchByDataForm(request.POST)
+            form = SearchByDateForm(request.POST)
             if form.is_valid():
                 data = GetPurchases.by_dates(request.user, key, form.cleaned_data.get('date_from'),
                                              form.cleaned_data.get('date_to'))
@@ -254,7 +254,7 @@ class AddPurchaseView(LoginRequiredMixin, View):
 
     def get(self, request):
         contractors = GetContractors.choices(request.user, request.session['key'])
-        goods = get_user_goods(request.user, request.session['key'])
+        goods = GetGoods.choices(request.user, request.session['key'])
         form = SelectContractorAndDateForm(contractors=contractors)
         formset = AddPurchaseAndSaleFormset(request.GET or None, form_kwargs={"goods": goods})
 
@@ -279,11 +279,11 @@ class AddPurchaseView(LoginRequiredMixin, View):
             quantity = request.POST.get(f'form-{i}-quantity')
             purchase.money += Decimal(price_per_unit) * Decimal(quantity)
             GetPurchases.add_to_stock(key, goods, quantity)
-            price_per_unit = encrypt(key, price_per_unit)
-            quantity = encrypt(key, quantity)
+            price_per_unit = Encryption.encrypt(key, price_per_unit)
+            quantity = Encryption.encrypt(key, quantity)
             PurchasesGoods.objects.create(purchase_id=purchase.id, goods_id=goods, price_per_unit=price_per_unit,
                                           quantity_bought=quantity)
-        purchase.money = encrypt(key, purchase.money)
+        purchase.money = Encryption.encrypt(key, purchase.money)
         purchase.save()
         return redirect(reverse_lazy("view_purchases"))
 
@@ -293,7 +293,7 @@ class ViewSalesView(LoginRequiredMixin, View):
     def get(self, request):
         try:
             key = request.session['key']
-            form = SearchByDataForm()
+            form = SearchByDateForm()
             data = GetSales.all(request.user, key)
             ctx = {
                 "form": form,
@@ -309,7 +309,7 @@ class ViewSalesView(LoginRequiredMixin, View):
     def post(self, request):
         try:
             key = request.session['key']
-            form = SearchByDataForm(request.POST)
+            form = SearchByDateForm(request.POST)
             if form.is_valid():
                 data = GetSales.by_dates(request.user, key, form.cleaned_data.get('date_from'),
                                          form.cleaned_data.get('date_to'))
@@ -327,7 +327,7 @@ class AddSaleView(LoginRequiredMixin, View):
 
     def get(self, request):
         contractors = GetContractors.choices(request.user, request.session['key'])
-        goods = get_user_goods(request.user, request.session['key'])
+        goods = GetGoods.choices(request.user, request.session['key'])
         form = SelectContractorAndDateForm(contractors=contractors)
         formset = AddPurchaseAndSaleFormset(request.GET or None, form_kwargs={"goods": goods})
         ctx = {
@@ -351,11 +351,11 @@ class AddSaleView(LoginRequiredMixin, View):
             quantity = request.POST.get(f'form-{i}-quantity')
             sale.money += Decimal(price_per_unit) * Decimal(quantity)
             GetSales.remove_from_stock(key, goods, quantity)
-            price_per_unit = encrypt(key, price_per_unit)
-            quantity = encrypt(key, quantity)
+            price_per_unit = Encryption.encrypt(key, price_per_unit)
+            quantity = Encryption.encrypt(key, quantity)
             SalesGoods.objects.create(sale_id=sale.id, goods_id=goods, price_per_unit=price_per_unit,
                                       quantity_sold=quantity)
-        sale.money = encrypt(key, sale.money)
+        sale.money = Encryption.encrypt(key, sale.money)
         sale.save()
         return redirect(reverse_lazy("view_sales"))
 
@@ -389,8 +389,8 @@ class AddNotesView(View):
         form = AddNoteForm(request.POST)
         key = request.session['key']
         if form.is_valid():
-            name = encrypt(key, form.cleaned_data.get('name'))
-            content = encrypt(key, form.cleaned_data.get('content'))
+            name = Encryption.encrypt(key, form.cleaned_data.get('name'))
+            content = Encryption.encrypt(key, form.cleaned_data.get('content'))
             Notes.objects.create(user_id=request.user.id, name=name, content=content)
             return redirect(reverse_lazy('view_notes'))
         return render(request, "finance_manager/generic_form.html",
@@ -402,7 +402,7 @@ class ViewExtraIncomeView(View):
     def get(self, request):
         try:
             data = GetIncome.extra_all(request.user, request.session['key'])
-            form = SearchByDataForm()
+            form = SearchByDateForm()
             ctx = {'form': form, "data": data, "view": "Extra Income"}
             return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
         except KeyError:
@@ -413,7 +413,7 @@ class ViewExtraIncomeView(View):
     def post(self, request):
         try:
             key = request.session['key']
-            form = SearchByDataForm(request.POST)
+            form = SearchByDateForm(request.POST)
             if form.is_valid():
                 data = GetIncome.extra_by_date(request.user, key,
                                                form.cleaned_data.get('date_from'),
@@ -439,10 +439,10 @@ class AddExtraIncomeView(View):
         form = AddExtraForm(request.POST)
         key = request.session['key']
         if form.is_valid():
-            name = encrypt(key, form.cleaned_data.get('name'))
+            name = Encryption.encrypt(key, form.cleaned_data.get('name'))
             date = form.cleaned_data.get('date')
-            amount = encrypt(key, form.cleaned_data.get('amount'))
-            description = encrypt(key, form.cleaned_data.get('description'))
+            amount = Encryption.encrypt(key, form.cleaned_data.get('amount'))
+            description = Encryption.encrypt(key, form.cleaned_data.get('description'))
             ExtraIncome.objects.create(user_id=request.user.id, name=name, date=date, amount=amount,
                                        description=description)
             return redirect(reverse_lazy('view_income'))
@@ -459,7 +459,7 @@ class ViewExtraExpensesView(View):
     def get(self, request):
         try:
             data = GetExpenses.extra_all(request.user, request.session['key'])
-            form = SearchByDataForm()
+            form = SearchByDateForm()
             ctx = {'form': form, "data": data, "view": "Extra Expenses"}
             return render(request, "finance_manager/template_extra_income_expenses.html", ctx)
         except KeyError:
@@ -470,7 +470,7 @@ class ViewExtraExpensesView(View):
     def post(self, request):
         try:
             key = request.session['key']
-            form = SearchByDataForm(request.POST)
+            form = SearchByDateForm(request.POST)
             if form.is_valid():
                 data = GetExpenses.extra_by_date(request.user, key, form.cleaned_data.get('date_from'),
                                                  form.cleaned_data.get('date_to'))
@@ -495,10 +495,10 @@ class AddExtraExpensesView(View):
         form = AddExtraForm(request.POST)
         key = request.session['key']
         if form.is_valid():
-            name = encrypt(key, form.cleaned_data.get('name'))
+            name = Encryption.encrypt(key, form.cleaned_data.get('name'))
             date = form.cleaned_data.get('date')
-            amount = encrypt(key, form.cleaned_data.get('amount'))
-            description = encrypt(key, form.cleaned_data.get('description'))
+            amount = Encryption.encrypt(key, form.cleaned_data.get('amount'))
+            description = Encryption.encrypt(key, form.cleaned_data.get('description'))
             ExtraExpenses.objects.create(user_id=request.user.id, name=name, date=date, amount=amount,
                                          description=description)
             return redirect(reverse_lazy('view_expenses'))
@@ -517,7 +517,7 @@ class ViewContractorPurchasesAndSalesView(View):
             key = request.session['key']
             purchases = GetContractors.purchases(request.user, key, contractor_id)
             sales = GetContractors.sales(request.user, key, contractor_id)
-            view = f"{decrypt(key, Contractors.objects.get(id=contractor_id).name)} transactions"
+            view = f"{Encryption.decrypt(key, Contractors.objects.get(id=contractor_id).name)} transactions"
             ctx = {
                 'purchases': purchases,
                 'sales': sales,
@@ -540,6 +540,56 @@ class DeleteContractorView(View):
         return redirect(reverse_lazy('view_contractors'))
 
 
+class DeletePurchaseView(View):
+
+    def get(self, request, purchase_id):
+        purchase = Purchases.objects.get(id=purchase_id)
+        if request.user == purchase.user:
+            purchase.delete()
+            return redirect(reverse_lazy('view_purchases'))
+        return redirect(reverse_lazy('view_purchases'))
+
+
+class DeleteSaleView(View):
+
+    def get(self, request, sale_id):
+        sale = Sales.objects.get(id=sale_id)
+        if request.user == sale.user:
+            sale.delete()
+            return redirect(reverse_lazy('view_sales'))
+        return redirect(reverse_lazy('view_sales'))
+
+
+class DeleteIncomeView(View):
+
+    def get(self, request, income_id):
+        income = ExtraIncome.objects.get(id=income_id)
+        if request.user == income.user:
+            income.delete()
+            return redirect(reverse_lazy('view_income'))
+        return redirect(reverse_lazy('view_income'))
+
+
+class DeleteExpenseView(View):
+
+    def get(self, request, expense_id):
+        expense = ExtraExpenses.objects.get(id=expense_id)
+        if request.user == expense.user:
+            expense.delete()
+            return redirect(reverse_lazy('view_expenses'))
+        return redirect(reverse_lazy('view_expenses'))
+
+
+class DeleteNoteView(View):
+
+    def get(self, request, note_id):
+        note = Notes.objects.get(id=note_id)
+        if request.user == note.user:
+            note.delete()
+            return redirect(reverse_lazy('view_notes'))
+        return redirect(reverse_lazy('view_notes'))
+
+
 class ProfileSettingsView(View):
 
     def get(self, request):
@@ -557,3 +607,60 @@ class ProfileSettingsView(View):
             user.profile.save()
             return redirect(reverse_lazy('main_screen'))
         return redirect(reverse_lazy('settings'))
+
+
+class ViewGoodsDetailsView(View):
+
+    def get(self, request, goods_id):
+        try:
+            key = request.session['key']
+            form = SearchByDateForm()
+            item = GetGoods.specific(request.user, key, goods_id)
+            purchased = GetGoods.purchased(request.user, key, goods_id)
+            sold = GetGoods.sold(request.user, key, goods_id)
+            balance = Utils.balance(sold[1], purchased[1])
+            profit = round(Utils.profit(sold[1], purchased[1]), 2)
+            ctx = {
+                'form': form,
+                'purchases': purchased[0],
+                'sales': sold[0],
+                'total_paid': purchased[1],
+                'total_earned': sold[1],
+                'balance': balance,
+                'profit': profit,
+                'item_data': item,
+            }
+            return render(request, 'finance_manager/goods_transactions_list.html', ctx)
+        except KeyError:
+            return redirect(reverse_lazy('load_key'))
+        except SyntaxError:
+            return redirect(reverse_lazy('load_key'))
+
+    def post(self, request, goods_id):
+        try:
+            key = request.session['key']
+            form = SearchByDateForm(request.POST)
+            item = GetGoods.specific(request.user, key, goods_id)
+            if form.is_valid():
+                date_from = form.cleaned_data.get('date_from')
+                date_to = form.cleaned_data.get('date_to')
+                purchased = GetGoods.purchased(request.user, key, goods_id, date_from, date_to)
+                sold = GetGoods.sold(request.user, key, goods_id, date_from, date_to)
+                balance = Utils.balance(sold[1], purchased[1])
+                profit = round(Utils.profit(sold[1], purchased[1]), 2)
+                ctx = {
+                    'form': form,
+                    'purchases': purchased[0],
+                    'sales': sold[0],
+                    'total_paid': purchased[1],
+                    'total_earned': sold[1],
+                    'balance': balance,
+                    'item_data': item,
+                    'profit': profit,
+                }
+                return render(request, 'finance_manager/goods_transactions_list.html', ctx)
+            return redirect(reverse_lazy('view_goods'))
+        except KeyError:
+            return redirect(reverse_lazy('view_goods'))
+        except SyntaxError:
+            return redirect(reverse_lazy('view_goods'))

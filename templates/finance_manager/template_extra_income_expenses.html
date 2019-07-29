@@ -5,7 +5,7 @@
 {% block content %}
     <div class="card">
         <div class="card-body">
-            <p class="card-title">Search Purchases:</p>
+            <p class="card-title">Search:</p>
             <form method="post" class="card-body, form-group">
                 <table>
                 {% csrf_token %}
@@ -20,15 +20,16 @@
             <p class="card-title" style="display: inline-block">{{ view }} list:</p>
             <a class="btn btn-light mt-5 mt-xl-0 expand" style="display: inline-block; float: right;" href="add/">Add
                 new</a>
-            {% for income in data %}
+            {% for obj in data %}
                 <div class="card-header">
-                    <h3>{{ income.name }}</h3>
-                    <h4 style="display: inline-block">{{ income.date }}</h4>
+                    <h3>{{ obj.name }}</h3>
+                    <h4 style="display: inline-block">{{ obj.date }}</h4>
                     <a class="btn btn-primary mt-5 mt-xl-0 expand" style="display: inline-block">Details</a>
+                    <a class="btn btn-danger mt-5 mt-xl-0 expand" style="display: inline-block; float: right" href="delete/{{ obj.id }}">Delete</a>
                 </div>
                 <div class="card-body collapse">
-                    <h4>Amount: {{ income.amount }} PLN</h4>
-                    <h5>Description:{{ income.description }}</h5>
+                    <h4>Amount: {{ obj.amount }} {{ user.profile.currency }}</h4>
+                    <h5>Description:{{ obj.description }}</h5>
                 </div>
             {% endfor %}
         </div>

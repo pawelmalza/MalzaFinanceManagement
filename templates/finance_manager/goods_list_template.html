@@ -19,7 +19,7 @@
                     <tbody>
                     {% for item in goods %}
                         <tr>
-                            <td>{{ item.name }}</td>
+                            <td><a href="{{ item.id }}/">{{ item.name }}</a></td>
                             <td>{{ item.on_stock }}&nbsp;{{ item.units }}</td>
                         </tr>
                     {% endfor %}
