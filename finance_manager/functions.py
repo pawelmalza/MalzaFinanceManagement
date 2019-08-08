@@ -30,7 +30,8 @@ class Encryption:
         input_enc = Encryption.pad(str(input_enc))
         iv = Random.new().read(AES.block_size)
         aes = AES.new(key, AES.MODE_CBC, iv)
-        return base64.b64encode(iv + aes.encrypt(input_enc))
+
+        return base64.b64encode(iv + aes.encrypt(bytes(input_enc, 'utf-8')))
 
     @staticmethod
     def decrypt(key, output):
